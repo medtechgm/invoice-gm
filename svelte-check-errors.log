@@ -1,0 +1,272 @@
+
+> invoice-gm@0.0.1 check
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: /home/msj/Desktop/invoice-gm
+Getting Svelte diagnostics...
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/[id]/+page.svelte:196:29
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                        <div class="space-y-1">
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                >Date Issued</label
+                            >
+                            <input
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/[id]/+page.svelte:207:29
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                        <div class="space-y-1">
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                >Valid Until</label
+                            >
+                            <input
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/[id]/+page.svelte:222:25
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                    <div class="space-y-4">
+                        <label
+                            class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                            >From</label
+                        >
+                        <input
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/[id]/+page.svelte:236:25
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                    <div class="space-y-4">
+                        <label
+                            class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                            >Bill To</label
+                        >
+                        <div class="font-black text-xl">
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/[id]/+page.svelte:29:9
+Error: Type '{ name: string; address: string; email: string; phone: string; logo: string; }' is missing the following properties from type 'CompanyInfo': website, taxId (ts)
+    let validUntil = "";
+    let sender: CompanyInfo = {
+        name: "",
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/[id]/+page.svelte:97:24
+Error: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'. (ts)
+
+        updateEstimate(estimateId, updates);
+        goto("/estimates");
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/new/+page.svelte:226:29
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                        <div class="space-y-3">
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                >From</label
+                            >
+                            <input
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/new/+page.svelte:249:33
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                            <div class="space-y-1">
+                                <label
+                                    class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                    >Date Issued</label
+                                >
+                                <input
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/new/+page.svelte:261:33
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                            <div class="space-y-1">
+                                <label
+                                    class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                    >Valid Until</label
+                                >
+                                <input
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/new/+page.svelte:274:29
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                        <div class="flex items-center justify-between px-2">
+                            <label
+                                class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                >Currency</label
+                            >
+                            <select
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/new/+page.svelte:299:25
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                    <div class="flex items-center justify-between">
+                        <label
+                            class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                            >Bill To</label
+                        >
+                        <button
+
+/home/msj/Desktop/invoice-gm/src/routes/estimates/new/+page.svelte:425:25
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                    <div class="group space-y-2">
+                        <label
+                            class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 group-focus-within:text-indigo-500 transition-colors"
+                            >Notes</label
+                        >
+                        <textarea
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/[id]/+page.svelte:242:33
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                            <div class="space-y-1">
+                                <label
+                                    class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                    >From</label
+                                >
+                                <div class="font-black text-2xl text-slate-900">
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/[id]/+page.svelte:271:37
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                                >
+                                    <label
+                                        class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                        >Number</label
+                                    >
+                                    <input
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/[id]/+page.svelte:283:37
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                                >
+                                    <label
+                                        class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                        >Date</label
+                                    >
+                                    <input
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/[id]/+page.svelte:296:37
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                                >
+                                    <label
+                                        class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                        >Due Date</label
+                                    >
+                                    <input
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/[id]/+page.svelte:314:25
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                    <div class="w-full">
+                        <label
+                            class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4"
+                            >Bill To</label
+                        >
+                        <select
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/[id]/+page.svelte:389:29
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                        <div class="space-y-2">
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                >Notes</label
+                            >
+                            <textarea
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/[id]/+page.svelte:400:29
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                        <div class="space-y-2">
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                >Terms</label
+                            >
+                            <textarea
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/new/+page.svelte:246:29
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                        <div class="space-y-3">
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                >From</label
+                            >
+                            <input
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/new/+page.svelte:316:33
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                            <div class="space-y-1">
+                                <label
+                                    class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                    >Date Issued</label
+                                >
+                                <input
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/new/+page.svelte:328:33
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                            <div class="space-y-1">
+                                <label
+                                    class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                    >Date Due</label
+                                >
+                                <input
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/new/+page.svelte:340:33
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                            <div class="space-y-1">
+                                <label
+                                    class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                    >PO Number</label
+                                >
+                                <input
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/new/+page.svelte:354:29
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                        <div class="flex items-center justify-between px-2">
+                            <label
+                                class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                                >Currency</label
+                            >
+                            <select
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/new/+page.svelte:379:25
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                    <div class="flex items-center justify-between">
+                        <label
+                            class="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                            >Bill To</label
+                        >
+                        <button
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/new/+page.svelte:537:25
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                    <div class="group space-y-2">
+                        <label
+                            class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 group-focus-within:text-emerald-500 transition-colors"
+                            >Notes</label
+                        >
+                        <textarea
+
+/home/msj/Desktop/invoice-gm/src/routes/invoices/new/+page.svelte:549:25
+Warn: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+                    <div class="group space-y-2">
+                        <label
+                            class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 group-focus-within:text-emerald-500 transition-colors"
+                            >Terms & Conditions</label
+                        >
+                        <textarea
+
+====================================
+svelte-check found 2 errors and 25 warnings in 4 files
