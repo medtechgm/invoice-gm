@@ -157,10 +157,10 @@
         </div>
     {/if}
 
-    <div class="h-16 flex items-center px-6 border-b border-slate-700">
-        <div class="flex items-center gap-2">
+    <div class="h-20 flex items-center px-6 border-b border-slate-700/50">
+        <div class="flex items-center gap-3">
             <div
-                class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold"
+                class="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold shadow-lg shadow-emerald-500/30"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -177,13 +177,16 @@
                     />
                 </svg>
             </div>
-            <span class="text-white text-lg font-bold tracking-tight"
-                >Invoicer App</span
-            >
+            <div>
+                <span class="text-white text-sm font-bold tracking-tight block leading-tight"
+                    >Invoicer</span
+                >
+                <span class="text-slate-400 text-[10px] font-medium">Business</span>
+            </div>
         </div>
     </div>
 
-    <nav class="flex-1 py-4 flex flex-col gap-1 overflow-y-auto">
+    <nav class="flex-1 py-6 px-3 flex flex-col gap-0.5 overflow-y-auto">
         {#each menuItems as item}
             {@const isItemActive = item.path
                 ? $page.url.pathname === item.path ||
@@ -197,12 +200,12 @@
 
             {#if item.subItems}
                 {@const isExpanded = expandedMenus.has(item.name)}
-                <div class="px-2 mb-1">
+                <div>
                     <button
                         onclick={() => toggleMenu(item.name)}
-                        class="w-full flex items-center justify-between px-4 py-3 rounded-md transition-all {isActive
-                            ? 'text-white bg-slate-700/30'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-700/50'}"
+                        class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium {isActive
+                            ? 'text-emerald-300 bg-slate-700/40'
+                            : 'text-slate-300 hover:text-white hover:bg-slate-700/30'}"
                     >
                         <div class="flex items-center gap-3">
                             <svg
@@ -211,9 +214,9 @@
                                 viewBox="0 0 24 24"
                                 stroke-width="1.5"
                                 stroke="currentColor"
-                                class="w-5 h-5 {isActive
-                                    ? 'text-emerald-500'
-                                    : ''}"
+                                class="w-5 h-5 flex-shrink-0 {isActive
+                                    ? 'text-emerald-400'
+                                    : 'text-slate-400'}"
                             >
                                 <path
                                     stroke-linecap="round"
@@ -221,8 +224,7 @@
                                     d={item.icon}
                                 />
                             </svg>
-                            <span
-                                class="font-bold text-sm tracking-wide uppercase opacity-80"
+                            <span class="text-sm font-medium tracking-tight"
                                 >{item.name}</span
                             >
                         </div>
@@ -232,7 +234,7 @@
                             viewBox="0 0 24 24"
                             stroke-width="2.5"
                             stroke="currentColor"
-                            class="w-3 h-3 opacity-50 transition-transform duration-200 {isExpanded
+                            class="w-3.5 h-3.5 opacity-60 transition-transform duration-200 flex-shrink-0 {isExpanded
                                 ? 'rotate-180'
                                 : ''}"
                         >
@@ -244,40 +246,18 @@
                         </svg>
                     </button>
                     {#if isExpanded}
-                        <div
-                            class="mt-1 space-y-1"
-                            transition:slide={{ duration: 250 }}
-                        >
+                        <div class="mt-1 space-y-1 ml-2" transition:slide={{ duration: 200 }}>
                             {#each item.subItems as sub}
                                 {@const isSubActive =
                                     $page.url.pathname === sub.path}
                                 <a
                                     href={sub.path}
-                                    class="flex items-center gap-3 px-10 py-2.5 rounded-md transition-colors {isSubActive
-                                        ? 'text-white bg-emerald-500/10'
-                                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'}"
+                                    class="flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 text-sm {isSubActive
+                                        ? 'text-white bg-emerald-500/20 font-medium'
+                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/30 font-normal'}"
                                 >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-4 h-4 {isSubActive
-                                            ? 'text-emerald-500'
-                                            : 'opacity-50'}"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d={sub.icon}
-                                        />
-                                    </svg>
-                                    <span
-                                        class="text-sm {isSubActive
-                                            ? 'font-semibold'
-                                            : 'font-medium'}">{sub.name}</span
-                                    >
+                                    <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 {isSubActive ? 'bg-emerald-400' : 'bg-slate-500'}"></div>
+                                    <span>{sub.name}</span>
                                 </a>
                             {/each}
                         </div>
@@ -286,22 +266,19 @@
             {:else}
                 <a
                     href={item.path}
-                    class="flex items-center gap-3 px-6 py-3 mx-2 rounded-md transition-colors relative {isActive
-                        ? 'text-white'
-                        : 'hover:bg-slate-700/50 hover:text-white'}"
+                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium {isActive
+                        ? 'text-emerald-300 bg-slate-700/40'
+                        : 'text-slate-300 hover:text-white hover:bg-slate-700/30'}"
                 >
-                    {#if isActive}
-                        <div
-                            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-emerald-500 rounded-r-md"
-                        ></div>
-                    {/if}
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke-width="1.5"
                         stroke="currentColor"
-                        class="w-5 h-5 {isActive ? 'text-emerald-500' : ''}"
+                        class="w-5 h-5 flex-shrink-0 {isActive
+                            ? 'text-emerald-400'
+                            : 'text-slate-400'}"
                     >
                         <path
                             stroke-linecap="round"
@@ -309,24 +286,24 @@
                             d={item.icon}
                         />
                     </svg>
-                    <span class="font-medium text-sm">{item.name}</span>
+                    <span class="tracking-tight">{item.name}</span>
                 </a>
             {/if}
         {/each}
     </nav>
 
-    <div class="p-4 border-t border-slate-700">
-        <div class="flex items-center gap-3 px-2">
+    <div class="p-4 border-t border-slate-700/50 bg-slate-800/50">
+        <div class="flex items-center gap-3 px-3">
             <div
-                class="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center text-white text-xs font-medium"
+                class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xs font-bold flex-shrink-0"
             >
                 {session?.user?.email?.charAt(0).toUpperCase() || "U"}
             </div>
-            <div class="flex-1 overflow-hidden">
-                <p class="text-sm font-medium text-white truncate">
-                    User Account
+            <div class="flex-1 overflow-hidden min-w-0">
+                <p class="text-xs font-semibold text-white truncate">
+                    Account
                 </p>
-                <p class="text-xs text-slate-500 truncate">
+                <p class="text-[10px] text-slate-400 truncate">
                     {session?.user?.email || "Guest"}
                 </p>
             </div>
@@ -334,7 +311,7 @@
                 <form method="POST" action="/logout">
                     <button
                         type="submit"
-                        class="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-700 transition-colors"
+                        class="text-slate-400 hover:text-white p-1.5 rounded-md hover:bg-slate-700 transition-colors flex-shrink-0"
                         title="Logout"
                     >
                         <svg
@@ -343,12 +320,12 @@
                             viewBox="0 0 24 24"
                             stroke-width="1.5"
                             stroke="currentColor"
-                            class="w-5 h-5"
+                            class="w-4 h-4"
                         >
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
-                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+                                d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15m-3 0l3-3m0 0l-3-3m3 3H3"
                             />
                         </svg>
                     </button>

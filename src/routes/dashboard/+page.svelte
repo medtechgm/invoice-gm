@@ -1,5 +1,6 @@
 <script lang="ts">
     import { invoices } from "$lib/stores/invoices";
+    import { clients } from "$lib/stores/clients";
     import { settings } from "$lib/stores/settings";
     import { estimates } from "$lib/stores/estimates";
     import StatusBadge from "$lib/components/StatusBadge.svelte";
@@ -29,6 +30,10 @@
         $invoices
             .filter((inv) => inv.status === "overdue")
             .reduce((sum, inv) => sum + calculateTotal(inv), 0),
+    );
+
+    let recentInvoices = $derived(
+        [...$invoices].sort((a, b) => new Date(b.dateIssued).getTime() - new Date(a.dateIssued).getTime())
     );
 
     function calculateTotal(invoice: any) {
@@ -63,574 +68,271 @@
 </svelte:head>
 
 <div
-    class="p-4 sm:p-10 max-w-7xl mx-auto space-y-10"
+    class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-10"
     in:fade={{ duration: 400 }}
 >
-    <!-- Top Header & Quick Actions -->
-    <header
-        class="flex flex-col md:flex-row md:items-end justify-between gap-6"
-    >
-        <div>
-            <div class="flex items-center gap-3 mb-2">
-                <span
-                    class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider"
-                    >Business Overview</span
-                >
-                <span class="text-slate-300">/</span>
-                <span class="text-slate-400 text-xs font-medium"
-                    >{formatDate(new Date())}</span
-                >
-            </div>
-            <h1
-                class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight"
-            >
-                Welcome back, <span
-                    class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600"
-                    >{$settings?.company?.name || "Partner"}</span
-                >
-            </h1>
-            <p class="text-slate-500 mt-2 font-medium">
-                Here's what's happening with your business today.
-            </p>
-        </div>
-
-        <div class="flex items-center gap-3">
-            <AppButton
-                href="/estimates/new"
-                variant="outline"
-                class="!rounded-xl !py-2.5 !px-5 border-slate-200 hover:border-slate-300"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="w-4 h-4 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    /></svg
-                >
-                New Estimate
-            </AppButton>
-            <AppButton
-                href="/invoices/new"
-                variant="primary"
-                class="!rounded-xl !py-2.5 !px-5 shadow-lg shadow-emerald-500/20"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="w-4 h-4 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 4v16m8-8H4"
-                    /></svg
-                >
-                Create Invoice
-            </AppButton>
-        </div>
-    </header>
-
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Total Revenue Card -->
-        <div
-            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group hover:border-emerald-200 transition-all duration-300"
-        >
-            <div
-                class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500"
-            ></div>
-            <div class="relative z-10">
-                <div
-                    class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        ><path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        /></svg
-                    >
-                </div>
-                <p
-                    class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1"
-                >
-                    Total Revenue
-                </p>
-                <h3 class="text-2xl font-black text-slate-900">
-                    {formatCurrency(totalInvoiced, "USD")}
-                </h3>
-                <div
-                    class="mt-4 flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded-full"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="w-3 h-3"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        ><path
-                            fill-rule="evenodd"
-                            d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"
-                            clip-rule="evenodd"
-                        /></svg
-                    >
-                    +12.5% vs last month
-                </div>
-            </div>
-        </div>
-
-        <!-- Paid Card -->
-        <div
-            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group hover:border-blue-200 transition-all duration-300"
-        >
-            <div
-                class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500"
-            ></div>
-            <div class="relative z-10">
-                <div
-                    class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        ><path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        /></svg
-                    >
-                </div>
-                <p
-                    class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1"
-                >
-                    Total Paid
-                </p>
-                <h3 class="text-2xl font-black text-slate-900">
-                    {formatCurrency(totalPaid, "USD")}
-                </h3>
-                <p class="mt-4 text-[10px] font-medium text-slate-400">
-                    Everything looks great!
-                </p>
-            </div>
-        </div>
-
-        <!-- Pending Card -->
-        <div
-            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group hover:border-amber-200 transition-all duration-300"
-        >
-            <div
-                class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500"
-            ></div>
-            <div class="relative z-10">
-                <div
-                    class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        ><path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        /></svg
-                    >
-                </div>
-                <p
-                    class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1"
-                >
-                    Pending
-                </p>
-                <h3 class="text-2xl font-black text-slate-900">
-                    {formatCurrency(totalPending, "USD")}
-                </h3>
-                <p class="mt-4 text-[10px] font-medium text-slate-400">
-                    {$invoices.filter((i) => i.status === "sent").length} invoices
-                    waiting
-                </p>
-            </div>
-        </div>
-
-        <!-- Overdue Card -->
-        <div
-            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden group hover:border-red-200 transition-all duration-300"
-        >
-            <div
-                class="absolute -right-4 -top-4 w-24 h-24 bg-red-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500"
-            ></div>
-            <div class="relative z-10">
-                <div
-                    class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center mb-4"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        ><path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        /></svg
-                    >
-                </div>
-                <p
-                    class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1"
-                >
-                    Overdue
-                </p>
-                <h3 class="text-2xl font-black text-slate-900">
-                    {formatCurrency(totalOverdue, "USD")}
-                </h3>
-                <a
-                    href="/invoices?status=overdue"
-                    class="mt-4 text-[10px] font-bold text-red-600 hover:underline inline-block"
-                    >Take action now &rarr;</a
-                >
-            </div>
-        </div>
+    <div class="max-w-7xl mx-auto">
     </div>
-
-    <!-- Main Content: Charts & Recent Invoices -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Revenue Chart Section -->
-        <div
-            class="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm p-8"
-        >
-            <div class="flex items-center justify-between mb-10">
-                <div>
-                    <h2
-                        class="text-xl font-black text-slate-900 tracking-tight"
-                    >
-                        Revenue Over Time
-                    </h2>
-                    <p class="text-slate-400 text-xs mt-1">
-                        Snapshot of your business performance
-                    </p>
-                </div>
-                <div class="flex bg-slate-100 p-1 rounded-xl">
-                    <button
-                        class="px-4 py-1.5 text-[10px] font-bold bg-white text-slate-900 rounded-lg shadow-sm"
-                        >Monthly</button
-                    >
-                    <button
-                        class="px-4 py-1.5 text-[10px] font-bold text-slate-500 hover:text-slate-700"
-                        >Quarterly</button
-                    >
-                </div>
-            </div>
-
-            <!-- Custom CSS Bar Chart -->
-            <div class="h-64 flex items-end justify-between gap-4 px-2">
-                {#each months as month, i}
-                    <div class="flex-1 flex flex-col items-center gap-4 group">
-                        <div
-                            class="relative w-full flex flex-col items-center justify-end h-48"
-                        >
-                            <!-- Tooltip -->
-                            {#if hoveringBar === i}
-                                <div
-                                    class="absolute -top-10 bg-slate-900 text-white text-[10px] px-2 py-1 rounded-md shadow-xl whitespace-nowrap z-20"
-                                    in:fly={{ y: 5 }}
-                                >
-                                    {formatCurrency(revenueData[i], "USD")}
-                                </div>
-                            {/if}
-
-                            <!-- Bar -->
-                            <div
-                                role="presentation"
-                                onmouseenter={() => (hoveringBar = i)}
-                                onmouseleave={() => (hoveringBar = null)}
-                                class="w-full max-w-[40px] bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-xl transition-all duration-500 ease-out group-hover:from-emerald-600 group-hover:to-emerald-500 group-hover:scale-x-110 cursor-pointer shadow-lg shadow-emerald-500/10"
-                                style="height: {(revenueData[i] / maxRevenue) *
-                                    100}%"
-                            ></div>
-                        </div>
-                        <span
-                            class="text-[10px] font-black text-slate-400 group-hover:text-slate-900 transition-colors uppercase tracking-widest"
-                            >{month}</span
-                        >
-                    </div>
-                {/each}
-            </div>
-        </div>
-
-        <!-- Recent Activity Sidebar -->
-        <div
-            class="bg-slate-900 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden"
-        >
-            <!-- Background pattern -->
-            <div class="absolute inset-0 opacity-10 pointer-events-none">
-                <svg width="100%" height="100%"
-                    ><pattern
-                        id="grid"
-                        width="40"
-                        height="40"
-                        patternUnits="userSpaceOnUse"
-                        ><path
-                            d="M 40 0 L 0 0 0 40"
-                            fill="none"
-                            stroke="white"
-                            stroke-width="0.5"
-                        /></pattern
-                    ><rect width="100%" height="100%" fill="url(#grid)" /></svg
-                >
-            </div>
-
-            <div class="relative z-10">
-                <h2 class="text-xl font-bold mb-8 flex items-center gap-3">
-                    <span
-                        class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
-                    ></span>
-                    Recent Activity
-                </h2>
-
-                <div class="space-y-8">
-                    {#each $invoices.slice(0, 4) as inv}
-                        <button
-                            class="w-full text-left flex gap-4 group cursor-pointer"
-                            onclick={() => handleInvoiceClick(inv.id)}
-                        >
-                            <div class="mt-1">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 group-hover:border-emerald-500/50 transition-colors"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="w-4 h-4 text-emerald-500"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        ><path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        /></svg
-                                    >
-                                </div>
-                            </div>
-                            <div>
-                                <p
-                                    class="text-sm font-bold text-white line-clamp-1 group-hover:text-emerald-400 transition-colors"
-                                >
-                                    {inv.client.companyName}
-                                </p>
-                                <p
-                                    class="text-[11px] text-slate-400 font-medium"
-                                >
-                                    Invoice {inv.invoiceNumber} • {inv.status}
-                                </p>
-                                <p
-                                    class="text-[10px] text-slate-500 mt-1 uppercase tracking-tighter"
-                                >
-                                    {formatDate(inv.dateIssued)}
-                                </p>
-                            </div>
-                        </button>
-                    {/each}
-
-                    {#if $invoices.length === 0}
-                        <div
-                            class="py-12 text-center text-slate-500 italic text-sm"
-                        >
-                            No activity recorded yet.
-                        </div>
-                    {/if}
-                </div>
-
-                <a
-                    href="/invoices"
-                    class="mt-10 block text-center py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold tracking-widest uppercase transition-colors"
-                    >View All Activity</a
-                >
-            </div>
-        </div>
-    </div>
-
-    <!-- Detailed Invoices Table -->
-    <section
-        class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden mb-12"
-    >
-        <div
-            class="p-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4"
-        >
+        <!-- Main Content -->
+        <div class="space-y-8">
+            <!-- Greeting & Overview Section -->
             <div>
-                <h2 class="text-xl font-black text-slate-900 tracking-tight">
-                    Recent Invoices
-                </h2>
-                <p class="text-slate-400 text-xs mt-1">
-                    Management and status tracking
-                </p>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-900">Good afternoon</h1>
+                        <p class="text-slate-500 text-sm mt-2">
+                            <span class="inline-flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.603 3.799A4.823 4.823 0 0112 2.25c1.357 0 2.573.455 3.397 1.226.243.264.585.42.92.42.338 0 .678-.156.92-.42A4.823 4.823 0 0121.75 2.25h.007a.75.75 0 01.75.75V5a6 6 0 00-6-6h-.007a.75.75 0 00-.75.75v.003zM12 12a6 6 0 016-6H12a6 6 0 00-6 6v6a6 6 0 006 6h6a6 6 0 006-6v-.007a.75.75 0 01.75-.75H21a.75.75 0 01.75.75v.007a7.5 7.5 0 01-7.5 7.5h-6a7.5 7.5 0 01-7.5-7.5V12Z" clip-rule="evenodd" />
+                                </svg>
+                                Free trial. 14 days remaining.
+                            </span>
+                            <span class="text-blue-500 font-medium">Upgrade now and save.</span>
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <AppButton
+                            href="/invoices/new"
+                            variant="primary"
+                            class="!rounded-lg"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            New Invoice
+                        </AppButton>
+                        <AppButton
+                            href="/estimates/new"
+                            variant="primary"
+                            class="!rounded-lg"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            New Estimate
+                        </AppButton>
+                        <AppButton
+                            href="/clients/new"
+                            variant="primary"
+                            class="!rounded-lg"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            Add Client
+                        </AppButton>
+                    </div>
+                </div>
+
+                <!-- Overview with filter -->
+                <div class="flex items-center gap-4 mb-6">
+                    <h2 class="text-xl font-bold text-slate-900">Overview</h2>
+                    <button class="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Last 30 Days
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <a
-                href="/invoices"
-                class="text-blue-500 hover:text-blue-600 text-sm font-bold flex items-center gap-1"
-            >
-                View All
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 5l7 7-7 7"
-                    /></svg
-                >
-            </a>
-        </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead class="bg-slate-50/50">
-                    <tr>
-                        <th
-                            class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest"
-                            >Invoice</th
-                        >
-                        <th
-                            class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest"
-                            >Client</th
-                        >
-                        <th
-                            class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest"
-                            >Date</th
-                        >
-                        <th
-                            class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest"
-                            >Amount</th
-                        >
-                        <th
-                            class="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest"
-                            >Status</th
-                        >
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50">
-                    {#each $invoices.slice(0, 5) as inv}
-                        <tr
-                            class="hover:bg-slate-50/50 transition-colors group cursor-pointer"
-                            onclick={() => handleInvoiceClick(inv.id)}
-                        >
-                            <td class="px-8 py-5">
-                                <span
-                                    class="text-slate-900 font-black text-sm group-hover:text-emerald-600 transition-colors"
-                                    >{inv.invoiceNumber}</span
-                                >
-                            </td>
-                            <td class="px-8 py-5">
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-sm font-bold text-slate-700"
-                                        >{inv.client.companyName}</span
-                                    >
-                                    <span class="text-[10px] text-slate-400"
-                                        >{inv.client.email}</span
-                                    >
-                                </div>
-                            </td>
-                            <td
-                                class="px-8 py-5 text-sm text-slate-500 font-medium"
-                            >
-                                {formatDate(inv.dateIssued)}
-                            </td>
-                            <td
-                                class="px-8 py-5 text-sm font-black text-slate-900"
-                            >
-                                {formatCurrency(
-                                    calculateTotal(inv),
-                                    inv.currency,
-                                )}
-                            </td>
-                            <td class="px-8 py-5">
-                                <StatusBadge status={inv.status} />
-                            </td>
-                        </tr>
-                    {/each}
+            <!-- 3-Column Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Invoiced Card -->
+                <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-medium text-slate-600">Invoiced</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-900 mb-4">{formatCurrency(totalInvoiced, $settings.defaultCurrency)}</p>
+                    <a href="/invoices" class="text-sm text-blue-500 hover:text-blue-600 font-medium">View invoiced →</a>
+                </div>
 
-                    {#if $invoices.length === 0}
-                        <tr>
-                            <td colspan="5" class="px-8 py-20 text-center">
-                                <div class="p-4 sm:p-8 max-w-5xl mx-auto">
-                                    <div
-                                        class="w-16 h-16 bg-slate-100 text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class="w-8 h-8"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                            ><path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                            /></svg
-                                        >
-                                    </div>
-                                    <h3 class="text-slate-900 font-bold">
-                                        No invoices found
-                                    </h3>
-                                    <p class="text-slate-400 text-sm mt-1 mb-6">
-                                        Start by creating your first
-                                        professional invoice today.
-                                    </p>
-                                    <AppButton
-                                        href="/invoices/new"
-                                        variant="primary"
-                                        >Create Invoice</AppButton
-                                    >
-                                </div>
-                            </td>
-                        </tr>
+                <!-- Owing/Pending Card -->
+                <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-medium text-slate-600">Owing</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-900 mb-4">{formatCurrency(totalPending, $settings.defaultCurrency)}</p>
+                    <a href="/invoices?status=pending" class="text-sm text-blue-500 hover:text-blue-600 font-medium">View owing →</a>
+                </div>
+
+                <!-- Overdue Card -->
+                <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-medium text-slate-600">Overdue</h3>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-900 mb-4">{formatCurrency(totalOverdue, $settings.defaultCurrency)}</p>
+                    <a href="/invoices?status=overdue" class="text-sm text-blue-500 hover:text-blue-600 font-medium">View overdue →</a>
+                </div>
+            </div>
+
+            <!-- Side-by-side Tables Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Recent Invoices Table -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 bg-white">
+                        <h2 class="text-lg font-bold text-slate-900">Recent Invoices</h2>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-slate-200 bg-slate-50">
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Number</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Client</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+                                    <th class="text-right px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {#each recentInvoices.slice(0, 5) as invoice (invoice.id)}
+                                    <tr class="hover:bg-slate-50 transition-colors">
+                                        <td class="px-6 py-3 text-sm font-semibold text-slate-900">
+                                            <a href="/invoices/{invoice.id}" class="text-blue-500 hover:text-blue-600">
+                                                {invoice.invoiceNumber || `INV-${invoice.id.slice(0, 6)}`}
+                                            </a>
+                                        </td>
+                                        <td class="px-6 py-3 text-sm text-slate-600">
+                                            {invoice.client?.companyName || "Unknown"}
+                                        </td>
+                                        <td class="px-6 py-3 text-sm">
+                                            <StatusBadge status={invoice.status} />
+                                        </td>
+                                        <td class="px-6 py-3 text-sm font-bold text-slate-900 text-right">
+                                            {formatCurrency(calculateTotal(invoice), invoice.currency)}
+                                        </td>
+                                    </tr>
+                                {/each}
+                            </tbody>
+                        </table>
+
+                        {#if recentInvoices.length === 0}
+                            <div class="px-6 py-8 text-center text-slate-500">
+                                <p class="text-sm">No invoices yet. <a href="/invoices/new" class="text-blue-500 hover:text-blue-600 font-medium">Create one now</a></p>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+
+                <!-- Recent Estimates Table -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 bg-white">
+                        <h2 class="text-lg font-bold text-slate-900">Recent Estimates</h2>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-slate-200 bg-slate-50">
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Number</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Client</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+                                    <th class="text-right px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {#each $estimates.slice(0, 5) as estimate (estimate.id)}
+                                    <tr class="hover:bg-slate-50 transition-colors">
+                                        <td class="px-6 py-3 text-sm font-semibold text-slate-900">
+                                            <a href="/estimates/{estimate.id}" class="text-blue-500 hover:text-blue-600">
+                                                {estimate.estimateNumber || `EST-${estimate.id.slice(0, 6)}`}
+                                            </a>
+                                        </td>
+                                        <td class="px-6 py-3 text-sm text-slate-600">
+                                            {estimate.client?.companyName || "Unknown"}
+                                        </td>
+                                        <td class="px-6 py-3 text-sm">
+                                            <StatusBadge status={estimate.status} />
+                                        </td>
+                                        <td class="px-6 py-3 text-sm font-bold text-slate-900 text-right">
+                                            {formatCurrency(calculateTotal(estimate), estimate.currency)}
+                                        </td>
+                                    </tr>
+                                {/each}
+                            </tbody>
+                        </table>
+
+                        {#if $estimates.length === 0}
+                            <div class="px-6 py-8 text-center text-slate-500">
+                                <p class="text-sm">You have no estimates yet. <a href="/estimates/new" class="text-blue-500 hover:text-blue-600 font-medium">Create an estimate</a></p>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
+            <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-white">
+                    <h2 class="text-lg font-bold text-slate-900">Recent activity</h2>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200 bg-slate-50">
+                                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Event</th>
+                                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Description</th>
+                                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Document</th>
+                                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {#each recentInvoices.slice(0, 3) as invoice (invoice.id)}
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-3 text-sm font-medium text-slate-900">
+                                        {#if invoice.status === 'viewed'}
+                                            Invoice PDF viewed
+                                        {:else if invoice.status === 'paid'}
+                                            Invoice marked paid
+                                        {:else if invoice.status === 'sent'}
+                                            Invoice sent
+                                        {:else}
+                                            Invoice {invoice.status}
+                                        {/if}
+                                    </td>
+                                    <td class="px-6 py-3 text-sm text-slate-600">
+                                        Invoice {invoice.invoiceNumber || `INV-${invoice.id.slice(0, 6)}`} was {invoice.status} by {invoice.client?.contactName || 'client'}
+                                    </td>
+                                    <td class="px-6 py-3 text-sm">
+                                        <a href="/invoices/{invoice.id}" class="text-blue-500 hover:text-blue-600 font-medium">
+                                            {invoice.invoiceNumber || `INV-${invoice.id.slice(0, 6)}`}
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-3 text-sm text-slate-600">
+                                        {formatDate(new Date(invoice.dateIssued))}
+                                    </td>
+                                </tr>
+                            {/each}
+                        </tbody>
+                    </table>
+
+                    {#if recentInvoices.length === 0}
+                        <div class="px-6 py-12 text-center text-slate-500">
+                            <p class="text-sm">No activity yet. Create your first invoice to get started.</p>
+                        </div>
                     {/if}
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
-    </section>
 </div>
 
-<style>
-    /* Adding a subtle animation for the bars */
-    @keyframes barGrow {
-        from {
-            transform: scaleY(0);
-        }
-        to {
-            transform: scaleY(1);
-        }
-    }
-
-    .bg-gradient-to-t {
-        transform-origin: bottom;
-        animation: barGrow 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-</style>
