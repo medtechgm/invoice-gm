@@ -194,6 +194,10 @@
                     <h3 class="text-xl font-bold text-slate-900 mb-3">
                         Professional Invoices
                     </h3>
+                    <!-- <p class="text-slate-600">
+                        Create beautiful, brandable invoices in seconds. Export
+                        them to PDF or send them directly via email.
+                    </p> -->
                     <p class="text-slate-600">
                         Create beautiful, brandable invoices in seconds. Export
                         them to PDF or send them directly via email.
