@@ -3,7 +3,15 @@
     import { enhance } from "$app/forms";
     import { slide } from "svelte/transition";
 
-    let { session } = $props<{ session?: any }>();
+    let {
+        session,
+        isMobile = false,
+        onclose,
+    } = $props<{
+        session?: any;
+        isMobile?: boolean;
+        onclose?: () => void;
+    }>();
 
     const menuItems = [
         {
@@ -118,8 +126,37 @@
 </script>
 
 <aside
-    class="w-64 bg-slate-800 text-slate-300 min-h-screen flex flex-col fixed left-0 top-0 bottom-0 z-20"
+    class="{isMobile
+        ? 'w-full'
+        : 'w-64'} bg-slate-800 text-slate-300 min-h-screen flex flex-col {!isMobile
+        ? 'fixed left-0 top-0 bottom-0 z-20'
+        : ''}"
 >
+    <!-- Close button for mobile -->
+    {#if isMobile}
+        <div class="absolute right-4 top-4 z-50">
+            <button
+                type="button"
+                class="p-2 text-slate-400 hover:text-white"
+                onclick={onclose}
+            >
+                <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
+                </svg>
+            </button>
+        </div>
+    {/if}
+
     <div class="h-16 flex items-center px-6 border-b border-slate-700">
         <div class="flex items-center gap-2">
             <div

@@ -18,7 +18,7 @@
     <title>Settings - Invoicer App</title>
 </svelte:head>
 
-<div class="p-8 max-w-5xl mx-auto">
+<div class="p-4 sm:p-8 max-w-5xl mx-auto">
     <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
             Settings

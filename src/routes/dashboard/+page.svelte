@@ -63,7 +63,7 @@
 </svelte:head>
 
 <div
-    class="p-6 md:p-10 max-w-7xl mx-auto space-y-10"
+    class="p-4 sm:p-10 max-w-7xl mx-auto space-y-10"
     in:fade={{ duration: 400 }}
 >
     <!-- Top Header & Quick Actions -->
@@ -82,7 +82,7 @@
                 >
             </div>
             <h1
-                class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight"
+                class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight"
             >
                 Welcome back, <span
                     class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600"
@@ -578,7 +578,7 @@
                     {#if $invoices.length === 0}
                         <tr>
                             <td colspan="5" class="px-8 py-20 text-center">
-                                <div class="max-w-xs mx-auto">
+                                <div class="p-4 sm:p-8 max-w-5xl mx-auto">
                                     <div
                                         class="w-16 h-16 bg-slate-100 text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-4"
                                     >

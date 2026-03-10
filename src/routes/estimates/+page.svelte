@@ -63,7 +63,7 @@
     <title>Estimates - Invoicer App</title>
 </svelte:head>
 
-<div class="p-8 max-w-7xl mx-auto">
+<div class="p-4 sm:p-8 max-w-7xl mx-auto">
     <div
         class="flex items-center justify-between mb-8 flex-col sm:flex-row gap-4"
     >

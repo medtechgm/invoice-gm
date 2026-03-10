@@ -51,21 +51,23 @@
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
         on:click|self={close}
         transition:fade={{ duration: 200 }}
     >
         <div
-            class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative"
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
             transition:scale={{ duration: 200, start: 0.95 }}
         >
-            <div
-                class="p-6 border-b border-slate-100 flex items-center justify-between"
-            >
-                <h3 class="text-xl font-bold text-slate-800">{modalTitle}</h3>
+            <!-- Header -->
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50 to-white">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">{modalTitle}</h3>
+                    <p class="text-sm text-slate-500 mt-0.5">Choose how to send this {type === "invoice" ? "invoice" : "estimate"}</p>
+                </div>
                 <button
                     on:click={close}
-                    class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-50 transition-colors"
+                    class="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors"
                     aria-label="Close"
                 >
                     <svg
@@ -74,7 +76,7 @@
                         viewBox="0 0 24 24"
                         stroke-width="2"
                         stroke="currentColor"
-                        class="w-6 h-6"
+                        class="w-5 h-5"
                     >
                         <path
                             stroke-linecap="round"
@@ -85,92 +87,89 @@
                 </button>
             </div>
 
+            <!-- Content -->
             <div class="p-6 space-y-6">
                 <!-- From Section -->
-                <div class="space-y-3">
-                    <h4
-                        class="text-xs font-bold uppercase tracking-widest text-slate-400"
-                    >
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
                         From
                     </h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label
-                                for="fromName"
-                                class="block text-[10px] text-slate-500"
-                                >Name</label
-                            >
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="fromName" class="block text-xs font-medium text-slate-600 mb-1.5">
+                                Your Name
+                            </label>
                             <input
                                 id="fromName"
                                 type="text"
                                 bind:value={fromName}
-                                class="w-full text-sm border-slate-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-colors"
                             />
                         </div>
-                        <div class="space-y-1">
-                            <label
-                                for="fromEmail"
-                                class="block text-[10px] text-slate-500"
-                                >Email</label
-                            >
+                        <div>
+                            <label for="fromEmail" class="block text-xs font-medium text-slate-600 mb-1.5">
+                                Your Email
+                            </label>
                             <input
                                 id="fromEmail"
                                 type="email"
                                 bind:value={fromEmail}
-                                class="w-full text-sm border-slate-200 bg-slate-50 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-colors bg-slate-50 cursor-not-allowed"
+                                disabled
                             />
                         </div>
                     </div>
                 </div>
 
+                <!-- Divider -->
+                <div class="h-px bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100"></div>
+
                 <!-- Client Section -->
-                <div class="space-y-3">
-                    <h4
-                        class="text-xs font-bold uppercase tracking-widest text-slate-400"
-                    >
-                        Client
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                        Recipient
                     </h4>
                     <div class="space-y-3">
-                        <div class="space-y-1">
-                            <label
-                                for="toName"
-                                class="block text-[10px] text-slate-500"
-                                >Name</label
-                            >
+                        <div>
+                            <label for="clientName" class="block text-xs font-medium text-slate-600 mb-1.5">
+                                Client Name
+                            </label>
                             <input
-                                id="toName"
+                                id="clientName"
                                 type="text"
                                 bind:value={clientName}
-                                class="w-full text-sm border-slate-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-colors"
                             />
                         </div>
-                        <div class="space-y-1">
-                            <label
-                                for="toEmail"
-                                class="block text-[10px] text-slate-500"
-                                >Email</label
-                            >
+                        <div>
+                            <label for="clientEmail" class="block text-xs font-medium text-slate-600 mb-1.5">
+                                Client Email
+                            </label>
                             <input
-                                id="toEmail"
+                                id="clientEmail"
                                 type="email"
                                 bind:value={clientEmail}
-                                class="w-full text-sm border-slate-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                                class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-colors"
                             />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div
-                class="p-6 bg-slate-50 flex flex-col gap-3 sm:flex-row sm:justify-between items-center border-t border-slate-100"
-            >
-                <AppButton variant="secondary" on:click={close}
-                    >Cancel</AppButton
+            <!-- Footer -->
+            <div class="px-6 py-5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-3 sm:gap-2">
+                <button
+                    on:click={close}
+                    class="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                 >
-                <div class="flex gap-2">
+                    Cancel
+                </button>
+                <div class="flex flex-col sm:flex-row gap-2 sm:ml-auto">
                     <button
                         on:click={handleWhatsApp}
-                        class="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg font-bold text-sm hover:brightness-95 transition-all shadow-sm shadow-[#25D366]/20"
+                        class="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#25D366] text-white rounded-lg font-semibold text-sm hover:bg-[#20ba5a] transition-colors shadow-sm"
                     >
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                             <path
@@ -179,9 +178,12 @@
                         </svg>
                         WhatsApp
                     </button>
-                    <AppButton variant="primary" on:click={handleSend}
-                        >Send via Email</AppButton
+                    <AppButton 
+                        variant="primary" 
+                        on:click={handleSend}
                     >
+                        Send Email
+                    </AppButton>
                 </div>
             </div>
         </div>
