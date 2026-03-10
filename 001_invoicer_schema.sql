@@ -13,7 +13,12 @@ CREATE TABLE public.profiles (
     address TEXT,
     website TEXT,
     tax_id TEXT,
+    domain TEXT,
     logo TEXT, -- Store URL to logo in storage
+    default_tax_rate NUMERIC(5,2) DEFAULT 0,
+    default_currency TEXT DEFAULT 'USD',
+    default_notes TEXT,
+    default_terms TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -34,6 +39,9 @@ CREATE TABLE public.clients (
     email TEXT NOT NULL,
     phone TEXT,
     address TEXT,
+    website TEXT,
+    tax_id TEXT,
+    notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -45,6 +53,28 @@ CREATE POLICY "Users can view own clients." ON public.clients FOR SELECT USING (
 CREATE POLICY "Users can insert own clients." ON public.clients FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own clients." ON public.clients FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own clients." ON public.clients FOR DELETE USING (auth.uid() = user_id);
+
+-- Create items table
+CREATE TABLE public.items (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    rate NUMERIC DEFAULT 0 NOT NULL,
+    sku TEXT,
+    category TEXT,
+    unit TEXT DEFAULT 'pcs' NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS for items
+ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own items." ON public.items FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own items." ON public.items FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own items." ON public.items FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own items." ON public.items FOR DELETE USING (auth.uid() = user_id);
 
 -- Create invoices table
 -- Note: sender, client, and items are stored as JSONB to preserve historical snapshots at the time of invoice creation
