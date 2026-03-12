@@ -413,3 +413,14 @@
         {/if}
     </div>
 </div>
+
+
+
+
+
+1. feat: Add intelligent item autocomplete to line items
+2. fix: Update Svelte 5 event handler syntax
+3. fix: Resolve Svelte 5 reactive statement deprecation warnings
+4. fix: Resolve accessibility and a11y warnings
+5. fix: Resolve InvoiceForm state reference warnings
+6. fix: Correct missing closing parenthesis in items page
