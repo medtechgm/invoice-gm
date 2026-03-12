@@ -11,7 +11,7 @@ export const actions: Actions = {
             return fail(400, { error: 'Email and password are required.' })
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: {
@@ -21,6 +21,10 @@ export const actions: Actions = {
 
         if (error) {
             return fail(500, { error: error.message })
+        }
+
+        if (data.session) {
+            throw redirect(303, '/dashboard')
         }
 
         // Success response

@@ -52,11 +52,11 @@ export const addItem = (item: Omit<Item, 'id'>) => {
             id,
             user_id: userId,
             name: item.name,
-            description: item.description,
+            description: item.description || null,
             rate: item.rate,
-            sku: item.sku,
-            category: item.category,
-            unit: item.unit
+            sku: item.sku || null,
+            category: item.category || null,
+            unit: item.unit || 'pcs'
         }]).then(({ error }: any) => {
             if (error) {
                 console.error('Failed to save item to Supabase:', error);

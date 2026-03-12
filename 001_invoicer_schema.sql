@@ -147,3 +147,80 @@ CREATE POLICY "Public access to logos" ON storage.objects FOR SELECT USING (buck
 CREATE POLICY "Authenticated users can upload logos" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'logos' AND auth.role() = 'authenticated');
 CREATE POLICY "Users can update own logos" ON storage.objects FOR UPDATE USING (bucket_id = 'logos' AND auth.uid() = owner);
 CREATE POLICY "Users can delete own logos" ON storage.objects FOR DELETE USING (bucket_id = 'logos' AND auth.uid() = owner);
+
+-- Create payments table
+CREATE TABLE public.payments (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    invoice_id UUID REFERENCES public.invoices(id) ON DELETE CASCADE NOT NULL,
+    amount NUMERIC NOT NULL,
+    payment_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    payment_method TEXT,
+    reference_number TEXT,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS for payments
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own payments." ON public.payments FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own payments." ON public.payments FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own payments." ON public.payments FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own payments." ON public.payments FOR DELETE USING (auth.uid() = user_id);
+
+-- Document History Table
+CREATE TABLE public.document_history (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    document_type TEXT NOT NULL,
+    document_id UUID NOT NULL,
+    action TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.document_history ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own document history." ON public.document_history FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own document history." ON public.document_history FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own document history." ON public.document_history FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own document history." ON public.document_history FOR DELETE USING (auth.uid() = user_id);
+
+-- Create tax_rates table
+CREATE TABLE public.tax_rates (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    name TEXT NOT NULL,
+    rate NUMERIC(5,2) NOT NULL,
+    is_default BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.tax_rates ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own tax rates." ON public.tax_rates FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own tax rates." ON public.tax_rates FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own tax rates." ON public.tax_rates FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own tax rates." ON public.tax_rates FOR DELETE USING (auth.uid() = user_id);
+
+-- Create expenses table
+CREATE TABLE public.expenses (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    category TEXT NOT NULL,
+    amount NUMERIC NOT NULL,
+    currency TEXT DEFAULT 'USD' NOT NULL,
+    payee TEXT,
+    description TEXT,
+    attachment_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own expenses." ON public.expenses FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own expenses." ON public.expenses FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own expenses." ON public.expenses FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own expenses." ON public.expenses FOR DELETE USING (auth.uid() = user_id);

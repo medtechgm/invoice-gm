@@ -1,6 +1,7 @@
 import { writable, get } from 'svelte/store';
 import type { Invoice } from '../models/invoice';
 import { v4 as uuidv4 } from 'uuid';
+import { logDocumentAction } from './history';
 
 export const invoices = writable<Invoice[]>([]);
 
@@ -45,6 +46,13 @@ export const addInvoice = (invoice: Omit<Invoice, 'id'>) => {
     // Optimistic UI update
     invoices.update(i => [...i, newInvoice]);
 
+    logDocumentAction({
+        documentType: 'invoice',
+        documentId: id,
+        action: 'created',
+        description: `Invoice ${invoice.invoiceNumber} created.`
+    });
+
     // Background DB update
     if (supabaseClient && userId) {
         supabaseClient.from('invoices').insert([{
@@ -76,6 +84,15 @@ export const addInvoice = (invoice: Omit<Invoice, 'id'>) => {
 
 export const updateInvoice = (id: string, updates: Partial<Invoice>) => {
     invoices.update(i => i.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
+
+    if (updates.status) {
+        logDocumentAction({
+            documentType: 'invoice',
+            documentId: id,
+            action: 'status_updated',
+            description: `Status changed to ${updates.status}.`
+        });
+    }
 
     if (supabaseClient) {
         const dbUpdates: any = {};

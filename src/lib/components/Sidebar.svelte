@@ -62,6 +62,22 @@
             ],
         },
         {
+            name: "Expenses",
+            icon: "M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75m0 5.25v.75m0 5.25v.75m1.5-8.25h15m-15 5.25h15m-15 5.25h15M3.75 4.5a1.5 1.5 0 0 1 1.5-1.5h15a1.5 1.5 0 0 1 1.5 1.5v15a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5V4.5Z",
+            subItems: [
+                {
+                    name: "New Expense",
+                    path: "/expenses/new",
+                    icon: "M12 4.5v15m7.5-7.5h-15",
+                },
+                {
+                    name: "List Expenses",
+                    path: "/expenses",
+                    icon: "M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z",
+                },
+            ],
+        },
+        {
             name: "Clients",
             icon: "M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
             subItems: [
@@ -139,6 +155,8 @@
                 type="button"
                 class="p-2 text-slate-400 hover:text-white"
                 onclick={onclose}
+                title="Close menu"
+                aria-label="Close menu"
             >
                 <svg
                     class="h-6 w-6"
@@ -178,10 +196,13 @@
                 </svg>
             </div>
             <div>
-                <span class="text-white text-sm font-bold tracking-tight block leading-tight"
+                <span
+                    class="text-white text-sm font-bold tracking-tight block leading-tight"
                     >Invoicer</span
                 >
-                <span class="text-slate-400 text-[10px] font-medium">Business</span>
+                <span class="text-slate-400 text-[10px] font-medium"
+                    >Business</span
+                >
             </div>
         </div>
     </div>
@@ -246,7 +267,10 @@
                         </svg>
                     </button>
                     {#if isExpanded}
-                        <div class="mt-1 space-y-1 ml-2" transition:slide={{ duration: 200 }}>
+                        <div
+                            class="mt-1 space-y-1 ml-2"
+                            transition:slide={{ duration: 200 }}
+                        >
                             {#each item.subItems as sub}
                                 {@const isSubActive =
                                     $page.url.pathname === sub.path}
@@ -256,7 +280,11 @@
                                         ? 'text-white bg-emerald-500/20 font-medium'
                                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/30 font-normal'}"
                                 >
-                                    <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 {isSubActive ? 'bg-emerald-400' : 'bg-slate-500'}"></div>
+                                    <div
+                                        class="w-1.5 h-1.5 rounded-full flex-shrink-0 {isSubActive
+                                            ? 'bg-emerald-400'
+                                            : 'bg-slate-500'}"
+                                    ></div>
                                     <span>{sub.name}</span>
                                 </a>
                             {/each}
@@ -300,9 +328,7 @@
                 {session?.user?.email?.charAt(0).toUpperCase() || "U"}
             </div>
             <div class="flex-1 overflow-hidden min-w-0">
-                <p class="text-xs font-semibold text-white truncate">
-                    Account
-                </p>
+                <p class="text-xs font-semibold text-white truncate">Account</p>
                 <p class="text-[10px] text-slate-400 truncate">
                     {session?.user?.email || "Guest"}
                 </p>

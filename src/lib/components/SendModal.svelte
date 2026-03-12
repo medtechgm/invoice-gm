@@ -1,58 +1,82 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
     import AppButton from "./AppButton.svelte";
     import { fade, scale } from "svelte/transition";
 
-    export let open = false;
-    export let title = "";
-    export let type: "invoice" | "estimate" = "invoice";
-    export let initialClientName = "";
+    let {
+        open = $bindable(false),
+        title = "",
+        type = "invoice",
+        initialClientName = "",
+        initialClientEmail = "",
+        onsend,
+        onclose,
+    } = $props<{
+        open?: boolean;
+        title?: string;
+        type?: "invoice" | "estimate";
+        initialClientName?: string;
+        initialClientEmail?: string;
+        onsend?: (data: any) => void;
+        onclose?: () => void;
+    }>();
 
-    $: modalTitle =
-        title || `Send ${type.charAt(0).toUpperCase() + type.slice(1)}`;
-    export let initialClientEmail = "";
+    let modalTitle = $derived(
+        title || `Send ${type.charAt(0).toUpperCase() + type.slice(1)}`,
+    );
 
-    const dispatch = createEventDispatcher();
+    let fromName = $state("User Account");
+    let fromEmail = $state("msgambia82@gmail.com");
+    let clientName = $state("");
+    let clientEmail = $state("");
 
-    let fromName = "User Account";
-    let fromEmail = "msgambia82@gmail.com";
-    let clientName = initialClientName;
-    let clientEmail = initialClientEmail;
+    // Sync editable fields when the modal opens or props change
+    $effect(() => {
+        if (open) {
+            clientName = initialClientName;
+            clientEmail = initialClientEmail;
+        }
+    });
 
     function handleSend() {
-        dispatch("send", {
-            fromName,
-            fromEmail,
-            clientName,
-            clientEmail,
-            method: "email",
-        });
+        if (onsend) {
+            onsend({
+                fromName,
+                fromEmail,
+                clientName,
+                clientEmail,
+                method: "email",
+            });
+        }
         open = false;
     }
 
     function handleWhatsApp() {
-        dispatch("send", {
-            fromName,
-            fromEmail,
-            clientName,
-            clientEmail,
-            method: "whatsapp",
-        });
+        if (onsend) {
+            onsend({
+                fromName,
+                fromEmail,
+                clientName,
+                clientEmail,
+                method: "whatsapp",
+            });
+        }
         open = false;
     }
 
     function close() {
         open = false;
-        dispatch("close");
+        if (onclose) onclose();
     }
 </script>
 
 {#if open}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
-        on:click|self={close}
+        role="presentation"
+        onclick={(e) => e.target === e.currentTarget && close()}
+        onkeydown={(e) => e.key === "Escape" && close()}
         transition:fade={{ duration: 200 }}
     >
         <div
@@ -60,13 +84,21 @@
             transition:scale={{ duration: 200, start: 0.95 }}
         >
             <!-- Header -->
-            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50 to-white">
+            <div
+                class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50 to-white"
+            >
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900">{modalTitle}</h3>
-                    <p class="text-sm text-slate-500 mt-0.5">Choose how to send this {type === "invoice" ? "invoice" : "estimate"}</p>
+                    <h3 class="text-lg font-bold text-slate-900">
+                        {modalTitle}
+                    </h3>
+                    <p class="text-sm text-slate-500 mt-0.5">
+                        Choose how to send this {type === "invoice"
+                            ? "invoice"
+                            : "estimate"}
+                    </p>
                 </div>
                 <button
-                    on:click={close}
+                    onclick={close}
                     class="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors"
                     aria-label="Close"
                 >
@@ -91,13 +123,19 @@
             <div class="p-6 space-y-6">
                 <!-- From Section -->
                 <div>
-                    <h4 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                    <h4
+                        class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2"
+                    >
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"
+                        ></span>
                         From
                     </h4>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label for="fromName" class="block text-xs font-medium text-slate-600 mb-1.5">
+                            <label
+                                for="fromName"
+                                class="block text-xs font-medium text-slate-600 mb-1.5"
+                            >
                                 Your Name
                             </label>
                             <input
@@ -108,7 +146,10 @@
                             />
                         </div>
                         <div>
-                            <label for="fromEmail" class="block text-xs font-medium text-slate-600 mb-1.5">
+                            <label
+                                for="fromEmail"
+                                class="block text-xs font-medium text-slate-600 mb-1.5"
+                            >
                                 Your Email
                             </label>
                             <input
@@ -123,17 +164,25 @@
                 </div>
 
                 <!-- Divider -->
-                <div class="h-px bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100"></div>
+                <div
+                    class="h-px bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100"
+                ></div>
 
                 <!-- Client Section -->
                 <div>
-                    <h4 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                    <h4
+                        class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2"
+                    >
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full"
+                        ></span>
                         Recipient
                     </h4>
                     <div class="space-y-3">
                         <div>
-                            <label for="clientName" class="block text-xs font-medium text-slate-600 mb-1.5">
+                            <label
+                                for="clientName"
+                                class="block text-xs font-medium text-slate-600 mb-1.5"
+                            >
                                 Client Name
                             </label>
                             <input
@@ -144,7 +193,10 @@
                             />
                         </div>
                         <div>
-                            <label for="clientEmail" class="block text-xs font-medium text-slate-600 mb-1.5">
+                            <label
+                                for="clientEmail"
+                                class="block text-xs font-medium text-slate-600 mb-1.5"
+                            >
                                 Client Email
                             </label>
                             <input
@@ -159,16 +211,18 @@
             </div>
 
             <!-- Footer -->
-            <div class="px-6 py-5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-3 sm:gap-2">
+            <div
+                class="px-6 py-5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-3 sm:gap-2"
+            >
                 <button
-                    on:click={close}
+                    onclick={close}
                     class="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                 >
                     Cancel
                 </button>
                 <div class="flex flex-col sm:flex-row gap-2 sm:ml-auto">
                     <button
-                        on:click={handleWhatsApp}
+                        onclick={handleWhatsApp}
                         class="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#25D366] text-white rounded-lg font-semibold text-sm hover:bg-[#20ba5a] transition-colors shadow-sm"
                     >
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -178,10 +232,7 @@
                         </svg>
                         WhatsApp
                     </button>
-                    <AppButton 
-                        variant="primary" 
-                        on:click={handleSend}
-                    >
+                    <AppButton variant="primary" onclick={handleSend}>
                         Send Email
                     </AppButton>
                 </div>

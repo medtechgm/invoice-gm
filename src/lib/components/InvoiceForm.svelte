@@ -10,6 +10,7 @@
     import { clients } from "$lib/stores/clients";
     import { invoices } from "$lib/stores/invoices";
     import { estimates } from "$lib/stores/estimates";
+    import { taxRates } from "$lib/stores/tax";
 
     import AppButton from "$lib/components/AppButton.svelte";
     import LineItemRow from "$lib/components/LineItemRow.svelte";
@@ -41,61 +42,92 @@
         }
     }
 
-    // Form state
-    let docNumber = $state(
-        (initialData as any).invoiceNumber ||
-            (initialData as any).estimateNumber ||
-            generateDefaultNumber(),
-    );
-    let referenceNumber = $state(
-        (initialData as any).poNumber ||
-            (initialData as any).referenceNumber ||
-            "",
-    );
-    let dateIssued = $state(
-        (initialData.dateIssued ? new Date(initialData.dateIssued) : new Date())
-            .toISOString()
-            .split("T")[0],
-    );
-    let dateDue = $state(
-        ((initialData as any).dateDue
-            ? new Date((initialData as any).dateDue)
-            : (initialData as any).dateValidUntil
-              ? new Date((initialData as any).dateValidUntil)
-              : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
-        )
-            .toISOString()
-            .split("T")[0],
-    );
+    // Helper to extract initial values from initialData prop
+    function getInitialValues() {
+        const d = initialData as any;
+        return {
+            docNumber: d?.invoiceNumber || d?.estimateNumber || "",
+            referenceNumber: d?.poNumber || d?.referenceNumber || "",
+            dateIssued: (d?.dateIssued ? new Date(d.dateIssued) : new Date())
+                .toISOString()
+                .split("T")[0],
+            dateDue: (d?.dateDue
+                ? new Date(d.dateDue)
+                : d?.dateValidUntil
+                  ? new Date(d.dateValidUntil)
+                  : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+            )
+                .toISOString()
+                .split("T")[0],
+            sender: d?.sender ? { ...d.sender } : { ...$settings.company },
+            selectedClientId:
+                d?.client?.id || ($clients.length > 0 ? $clients[0].id : ""),
+            items: d?.items
+                ? d.items.map((i: any) => ({ ...i }))
+                : [
+                      {
+                          id: uuidv4(),
+                          name: "",
+                          description: "",
+                          rate: 0,
+                          quantity: 1,
+                      },
+                  ],
+            taxRate: d?.taxRate ?? $settings.defaultTaxRate,
+            discount: d?.discount ?? 0,
+            shipping: d?.shipping ?? 0,
+            currency: d?.currency ?? $settings.defaultCurrency,
+            notes: d?.notes ?? $settings.defaultNotes,
+            terms: d?.terms ?? $settings.defaultTerms,
+        };
+    }
 
-    let sender: CompanyInfo = $state(
-        initialData.sender
-            ? { ...initialData.sender }
-            : { ...$settings.company },
-    );
-    let selectedClientId = $state(
-        initialData.client?.id || ($clients.length > 0 ? $clients[0].id : ""),
-    );
-    let items: InvoiceItem[] = $state(
-        initialData.items
-            ? initialData.items.map((i: any) => ({ ...i }))
-            : [
-                  {
-                      id: uuidv4(),
-                      name: "",
-                      description: "",
-                      rate: 0,
-                      quantity: 1,
-                  },
-              ],
-    );
+    const init = getInitialValues();
 
-    let taxRate = $state(initialData.taxRate ?? $settings.defaultTaxRate);
-    let discount = $state(initialData.discount ?? 0);
-    let shipping = $state(initialData.shipping ?? 0);
-    let currency = $state(initialData.currency ?? $settings.defaultCurrency);
-    let notes = $state(initialData.notes ?? $settings.defaultNotes);
-    let terms = $state(initialData.terms ?? $settings.defaultTerms);
+    // Form state - initialized with safe defaults, not directly from prop
+    let docNumber = $state(init.docNumber);
+    let referenceNumber = $state(init.referenceNumber);
+    let dateIssued = $state(init.dateIssued);
+    let dateDue = $state(init.dateDue);
+    let sender: CompanyInfo = $state(init.sender);
+    let selectedClientId = $state(init.selectedClientId);
+    let items: InvoiceItem[] = $state(init.items);
+    let taxRate = $state(init.taxRate);
+    let selectedTaxRate = $state(init.taxRate);
+    $effect(() => {
+        if (selectedTaxRate !== -1) {
+            taxRate = selectedTaxRate;
+        }
+    });
+    let discount = $state(init.discount);
+    let shipping = $state(init.shipping);
+    let currency = $state(init.currency);
+    let notes = $state(init.notes);
+    let terms = $state(init.terms);
+
+    // Reinitialize when initialData identity changes (e.g., navigating to a different record)
+    $effect(() => {
+        const d = initialData as any;
+        // Use a stable key to detect identity change
+        const key = d?.id || d?.invoiceNumber || d?.estimateNumber || "";
+        if (key) {
+            const v = getInitialValues();
+            docNumber = v.docNumber;
+            referenceNumber = v.referenceNumber;
+            dateIssued = v.dateIssued;
+            dateDue = v.dateDue;
+            sender = v.sender;
+            selectedClientId = v.selectedClientId;
+            items = v.items;
+            taxRate = v.taxRate;
+            selectedTaxRate = v.taxRate;
+            discount = v.discount;
+            shipping = v.shipping;
+            currency = v.currency;
+            notes = v.notes;
+            terms = v.terms;
+        }
+    });
 
     // Ship To address - allow custom shipping address
     let shipToName = $state("");
@@ -106,9 +138,9 @@
 
     // UI state
     let activeClientTab: "billed" | "shipped" = $state("billed");
-    let showShipping = $state(shipping > 0);
-    let showDiscount = $state(discount > 0);
-    let showTax = $state(taxRate > 0);
+    let showShipping = $derived(shipping > 0);
+    let showDiscount = $derived(discount > 0);
+    let showTax = $derived(taxRate > 0 || $taxRates.length > 0);
 
     // Computed
     let subtotal = $derived(
@@ -132,15 +164,13 @@
         ];
     }
 
-    function handleItemUpdate(event: CustomEvent<InvoiceItem>) {
-        const updatedItem = event.detail;
+    function handleItemUpdate(updatedItem: InvoiceItem) {
         items = items.map((item) =>
             item.id === updatedItem.id ? updatedItem : item,
         );
     }
 
-    function handleItemRemove(event: CustomEvent<string>) {
-        const idToRemove = event.detail;
+    function handleItemRemove(idToRemove: string) {
         if (items.length > 1) {
             items = items.filter((item) => item.id !== idToRemove);
         }
@@ -183,8 +213,7 @@
         showSendModal = true;
     }
 
-    function onSend(event: CustomEvent) {
-        const details = event.detail;
+    function onSend(details: any) {
         console.log(`Sending ${type} via ${details.method}`, details);
         // In a real app, we'd trigger the email/whatsapp service here
         onSave("sent");
@@ -199,12 +228,7 @@
         class="p-6 md:p-12 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-10 bg-gradient-to-br from-slate-50 to-white"
     >
         <div class="w-full md:w-1/3">
-            <FileUpload
-                value={sender.logo}
-                on:upload={(e) => (sender.logo = e.detail)}
-                on:remove={() => (sender.logo = "")}
-                label="Add your logo"
-            />
+            <FileUpload bind:value={sender.logo} label="Add your logo" />
         </div>
 
         <div class="flex-1 space-y-3">
@@ -320,7 +344,9 @@
                             <div
                                 class="bg-gradient-to-br from-emerald-50 to-slate-50 rounded-xl p-4 text-sm text-slate-600 space-y-2 border border-slate-100"
                             >
-                                <div class="font-semibold text-slate-900">{activeClient.companyName}</div>
+                                <div class="font-semibold text-slate-900">
+                                    {activeClient.companyName}
+                                </div>
                                 {#if activeClient.email}
                                     <div class="flex items-center gap-2">
                                         <svg
@@ -395,7 +421,7 @@
                             bind:checked={useCustomShipTo}
                             class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
                         />
-                        <label 
+                        <label
                             for="customShipTo"
                             class="text-sm font-medium text-slate-700 cursor-pointer"
                         >
@@ -404,9 +430,11 @@
                     </div>
 
                     {#if useCustomShipTo}
-                        <div class="space-y-4 bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+                        <div
+                            class="space-y-4 bg-emerald-50 rounded-xl p-4 border border-emerald-200"
+                        >
                             <div>
-                                <label 
+                                <label
                                     for="shipToName"
                                     class="block text-xs font-semibold text-slate-600 mb-1.5"
                                 >
@@ -422,7 +450,7 @@
                             </div>
 
                             <div>
-                                <label 
+                                <label
                                     for="shipToAddress"
                                     class="block text-xs font-semibold text-slate-600 mb-1.5"
                                 >
@@ -439,7 +467,7 @@
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label 
+                                    <label
                                         for="shipToEmail"
                                         class="block text-xs font-semibold text-slate-600 mb-1.5"
                                     >
@@ -454,7 +482,7 @@
                                     />
                                 </div>
                                 <div>
-                                    <label 
+                                    <label
                                         for="shipToPhone"
                                         class="block text-xs font-semibold text-slate-600 mb-1.5"
                                     >
@@ -480,10 +508,16 @@
                                 <div
                                     class="bg-gradient-to-br from-blue-50 to-slate-50 rounded-xl p-4 text-sm text-slate-600 space-y-2 border border-slate-100"
                                 >
-                                    <div class="font-semibold text-slate-900">{activeClient.companyName}</div>
-                                    <p class="text-xs text-slate-500 italic">Using billing address for shipping</p>
+                                    <div class="font-semibold text-slate-900">
+                                        {activeClient.companyName}
+                                    </div>
+                                    <p class="text-xs text-slate-500 italic">
+                                        Using billing address for shipping
+                                    </p>
                                     {#if activeClient.address}
-                                        <div class="flex items-start gap-2 mt-2 pt-2 border-t border-slate-200">
+                                        <div
+                                            class="flex items-start gap-2 mt-2 pt-2 border-t border-slate-200"
+                                        >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 fill="none"
@@ -653,10 +687,10 @@
             {#each items as item (item.id)}
                 <div transition:slide={{ duration: 200 }}>
                     <LineItemRow
-                        {item}
+                        bind:item={items[items.indexOf(item)]}
                         {currency}
-                        on:update={handleItemUpdate}
-                        on:remove={handleItemRemove}
+                        onupdate={handleItemUpdate}
+                        onremove={handleItemRemove}
                     />
                 </div>
             {/each}
@@ -697,7 +731,8 @@
                 <h4
                     class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2"
                 >
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"
+                    ></span>
                     Notes
                 </h4>
                 <textarea
@@ -711,7 +746,8 @@
                 <h4
                     class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2"
                 >
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"
+                    ></span>
                     Terms & Conditions
                 </h4>
                 <textarea
@@ -789,11 +825,33 @@
                                 >Tax</span
                             >
                             <div class="flex items-center gap-1">
-                                <input
-                                    type="number"
-                                    bind:value={taxRate}
-                                    class="w-14 text-center rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-0 px-2 py-1 font-bold text-slate-900 text-sm bg-white outline-none"
-                                />
+                                {#if $taxRates.length > 0}
+                                    <select
+                                        bind:value={selectedTaxRate}
+                                        class="w-32 rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-0 px-2 py-1 font-bold text-slate-900 text-sm bg-white outline-none"
+                                    >
+                                        <option value={0}>No Tax (0%)</option>
+                                        {#each $taxRates as rate}
+                                            <option value={rate.rate}
+                                                >{rate.name} ({rate.rate}%)</option
+                                            >
+                                        {/each}
+                                        <option value={-1}>Custom...</option>
+                                    </select>
+                                    {#if selectedTaxRate === -1}
+                                        <input
+                                            type="number"
+                                            bind:value={taxRate}
+                                            class="w-14 text-center rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-0 px-2 py-1 font-bold text-slate-900 text-sm bg-white outline-none ml-1"
+                                        />
+                                    {/if}
+                                {:else}
+                                    <input
+                                        type="number"
+                                        bind:value={taxRate}
+                                        class="w-14 text-center rounded-lg border border-slate-200 focus:border-emerald-500 focus:ring-0 px-2 py-1 font-bold text-slate-900 text-sm bg-white outline-none"
+                                    />
+                                {/if}
                                 <span class="text-slate-400 text-sm">%</span>
                             </div>
                         </div>
@@ -870,7 +928,7 @@
             {type}
             initialClientName={activeClient?.companyName || ""}
             initialClientEmail={activeClient?.email || ""}
-            on:send={onSend}
+            onsend={onSend}
         />
     {/if}
 </div>

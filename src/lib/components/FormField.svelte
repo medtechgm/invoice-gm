@@ -1,12 +1,21 @@
 <script lang="ts">
-    export let id: string;
-    export let label: string;
-    export let value: string | number = "";
-    export let type: "text" | "email" | "number" | "date" | "tel" | "textarea" =
-        "text";
-    export let placeholder = "";
-    export let required = false;
-    export let rows = 3; // for textarea
+    let {
+        id,
+        label,
+        value = $bindable(""),
+        type = "text",
+        placeholder = "",
+        required = false,
+        rows = 3,
+    } = $props<{
+        id: string;
+        label: string;
+        value?: string | number;
+        type?: "text" | "email" | "number" | "date" | "tel" | "textarea";
+        placeholder?: string;
+        required?: boolean;
+        rows?: number;
+    }>();
 
     const inputClass =
         "block w-full rounded-md border-0 py-1.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:text-sm sm:leading-6";

@@ -9,19 +9,19 @@
     import ConfirmDialog from "$lib/components/ConfirmDialog.svelte";
     import type { Item } from "$lib/stores/items";
 
-    let item: Item | null = null;
-    let name = "";
-    let sku = "";
-    let category = "";
-    let description = "";
-    let rate = 0;
-    let unit = "pcs";
-    let isEditing = false;
-    let showDeleteDialog = false;
+    let item: Item | null = $state(null);
+    let name = $state("");
+    let sku = $state("");
+    let category = $state("");
+    let description = $state("");
+    let rate = $state(0);
+    let unit = $state("pcs");
+    let isEditing = $state(false);
+    let showDeleteDialog = $state(false);
 
-    $: {
+    $effect(() => {
         const itemId = $page.params.id;
-        const foundItem = $items.find(i => i.id === itemId);
+        const foundItem = $items.find((i) => i.id === itemId);
         if (foundItem) {
             item = foundItem;
             name = foundItem.name;
@@ -31,21 +31,21 @@
             rate = foundItem.rate;
             unit = foundItem.unit;
         }
-    }
+    });
 
     function handleSubmit(e: Event) {
         e.preventDefault();
 
         if (!name) {
-            alert('Please enter an item name');
+            alert("Please enter an item name");
             return;
         }
         if (!category) {
-            alert('Please select a category');
+            alert("Please select a category");
             return;
         }
         if (rate <= 0) {
-            alert('Please enter a valid unit price');
+            alert("Please enter a valid unit price");
             return;
         }
 
@@ -70,18 +70,22 @@
         }
     }
 
-    $: currencySymbol = getCurrencySymbol($settings.defaultCurrency);
+    let currencySymbol = $derived(getCurrencySymbol($settings.defaultCurrency));
 </script>
 
 <svelte:head>
-    <title>{item?.name || 'Item'} - Invoicer App</title>
+    <title>{item?.name || "Item"} - Invoicer App</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
+<div
+    class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8"
+>
     {#if item}
         <div class="max-w-3xl mx-auto">
             <!-- Header -->
-            <div class="flex items-center justify-between gap-4 mb-8 flex-col sm:flex-row">
+            <div
+                class="flex items-center justify-between gap-4 mb-8 flex-col sm:flex-row"
+            >
                 <div class="flex items-center gap-4 w-full sm:w-auto">
                     <a
                         href="/items"
@@ -104,13 +108,20 @@
                         </svg>
                     </a>
                     <div>
-                        <h1 class="text-3xl font-bold text-slate-900">{name || 'Item'}</h1>
-                        <p class="text-slate-500 text-sm mt-0.5">View and manage item details</p>
+                        <h1 class="text-3xl font-bold text-slate-900">
+                            {name || "Item"}
+                        </h1>
+                        <p class="text-slate-500 text-sm mt-0.5">
+                            View and manage item details
+                        </p>
                     </div>
                 </div>
                 <div class="flex gap-2">
                     {#if !isEditing}
-                        <AppButton variant="secondary" onclick={() => (isEditing = true)}>
+                        <AppButton
+                            variant="secondary"
+                            onclick={() => (isEditing = true)}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
@@ -127,7 +138,10 @@
                             </svg>
                             Edit
                         </AppButton>
-                        <AppButton variant="danger" onclick={() => (showDeleteDialog = true)}>
+                        <AppButton
+                            variant="danger"
+                            onclick={() => (showDeleteDialog = true)}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
@@ -155,8 +169,11 @@
             >
                 <!-- Basic Information Section -->
                 <div class="p-6 sm:p-8 border-b border-slate-100">
-                    <h2 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-                        <span class="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                    <h2
+                        class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2"
+                    >
+                        <span class="w-1 h-1 bg-emerald-500 rounded-full"
+                        ></span>
                         Basic Information
                     </h2>
 
@@ -184,7 +201,10 @@
                                     for="sku"
                                     class="block text-sm font-medium text-slate-700 mb-2"
                                 >
-                                    SKU / Item Code <span class="text-slate-400 text-xs font-normal">(Optional)</span>
+                                    SKU / Item Code <span
+                                        class="text-slate-400 text-xs font-normal"
+                                        >(Optional)</span
+                                    >
                                 </label>
                                 <input
                                     id="sku"
@@ -208,9 +228,17 @@
                                     disabled={!isEditing}
                                     class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-colors bg-white cursor-pointer disabled:bg-slate-50 disabled:text-slate-600 disabled:cursor-not-allowed"
                                 >
-                                    <option value="" class="bg-slate-100 text-slate-500">Select a category...</option>
+                                    <option
+                                        value=""
+                                        class="bg-slate-100 text-slate-500"
+                                        >Select a category...</option
+                                    >
                                     {#each ITEM_CATEGORIES as cat}
-                                        <option value={cat.value} class="bg-white text-slate-900">{cat.label}</option>
+                                        <option
+                                            value={cat.value}
+                                            class="bg-white text-slate-900"
+                                            >{cat.label}</option
+                                        >
                                     {/each}
                                 </select>
                             </div>
@@ -219,7 +247,10 @@
                                     for="unit"
                                     class="block text-sm font-medium text-slate-700 mb-2"
                                 >
-                                    Unit <span class="text-slate-400 text-xs font-normal">(Optional)</span>
+                                    Unit <span
+                                        class="text-slate-400 text-xs font-normal"
+                                        >(Optional)</span
+                                    >
                                 </label>
                                 <select
                                     id="unit"
@@ -227,14 +258,46 @@
                                     disabled={!isEditing}
                                     class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-colors bg-white cursor-pointer disabled:bg-slate-50 disabled:text-slate-600 disabled:cursor-not-allowed"
                                 >
-                                    <option value="" class="bg-slate-100 text-slate-500">Select unit...</option>
-                                    <option value="pcs" class="bg-white text-slate-900">pcs (Pieces)</option>
-                                    <option value="hrs" class="bg-white text-slate-900">hrs (Hours)</option>
-                                    <option value="days" class="bg-white text-slate-900">days (Days)</option>
-                                    <option value="kg" class="bg-white text-slate-900">kg (Kilograms)</option>
-                                    <option value="unit" class="bg-white text-slate-900">unit</option>
-                                    <option value="m" class="bg-white text-slate-900">m (Meters)</option>
-                                    <option value="job" class="bg-white text-slate-900">job</option>
+                                    <option
+                                        value=""
+                                        class="bg-slate-100 text-slate-500"
+                                        >Select unit...</option
+                                    >
+                                    <option
+                                        value="pcs"
+                                        class="bg-white text-slate-900"
+                                        >pcs (Pieces)</option
+                                    >
+                                    <option
+                                        value="hrs"
+                                        class="bg-white text-slate-900"
+                                        >hrs (Hours)</option
+                                    >
+                                    <option
+                                        value="days"
+                                        class="bg-white text-slate-900"
+                                        >days (Days)</option
+                                    >
+                                    <option
+                                        value="kg"
+                                        class="bg-white text-slate-900"
+                                        >kg (Kilograms)</option
+                                    >
+                                    <option
+                                        value="unit"
+                                        class="bg-white text-slate-900"
+                                        >unit</option
+                                    >
+                                    <option
+                                        value="m"
+                                        class="bg-white text-slate-900"
+                                        >m (Meters)</option
+                                    >
+                                    <option
+                                        value="job"
+                                        class="bg-white text-slate-900"
+                                        >job</option
+                                    >
                                 </select>
                             </div>
                         </div>
@@ -243,8 +306,11 @@
 
                 <!-- Details Section -->
                 <div class="p-6 sm:p-8 border-b border-slate-100">
-                    <h2 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-                        <span class="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                    <h2
+                        class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2"
+                    >
+                        <span class="w-1 h-1 bg-emerald-500 rounded-full"
+                        ></span>
                         Description & Pricing
                     </h2>
 
@@ -254,7 +320,10 @@
                                 for="description"
                                 class="block text-sm font-medium text-slate-700 mb-2"
                             >
-                                Description <span class="text-slate-400 text-xs font-normal">(Optional)</span>
+                                Description <span
+                                    class="text-slate-400 text-xs font-normal"
+                                    >(Optional)</span
+                                >
                             </label>
                             <textarea
                                 id="description"
@@ -295,7 +364,9 @@
 
                 <!-- Action Buttons -->
                 {#if isEditing}
-                    <div class="px-6 sm:px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                    <div
+                        class="px-6 sm:px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3"
+                    >
                         <AppButton
                             type="button"
                             variant="secondary"
@@ -314,7 +385,9 @@
                         >
                             Cancel
                         </AppButton>
-                        <AppButton type="submit" variant="primary">Save Changes</AppButton>
+                        <AppButton type="submit" variant="primary"
+                            >Save Changes</AppButton
+                        >
                     </div>
                 {/if}
             </form>
@@ -352,5 +425,5 @@
     description={`Are you sure you want to delete ${name}? This action cannot be undone.`}
     confirmText="Delete"
     destructive={true}
-    on:confirm={handleDelete}
+    onconfirm={handleDelete}
 />

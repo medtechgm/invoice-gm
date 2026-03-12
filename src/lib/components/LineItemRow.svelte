@@ -1,33 +1,41 @@
 <script lang="ts">
     import type { InvoiceItem } from "$lib/models/invoice";
     import { formatCurrency } from "$lib/utils/formatters";
-    import { createEventDispatcher } from "svelte";
     import { items } from "$lib/stores/items";
 
-    export let item: InvoiceItem;
-    export let currency: string = "USD";
+    let {
+        item = $bindable(),
+        currency = "USD",
+        onupdate,
+        onremove,
+    } = $props<{
+        item: InvoiceItem;
+        currency?: string;
+        onupdate?: (item: InvoiceItem) => void;
+        onremove?: (id: string) => void;
+    }>();
 
-    const dispatch = createEventDispatcher();
+    let showSuggestions = $state(false);
+    let filteredItems: any[] = $state([]);
 
-    let showSuggestions = false;
-    let filteredItems: any[] = [];
-
-    $: total = item.rate * item.quantity;
+    let total = $derived(item.rate * item.quantity);
 
     function handleUpdate() {
-        dispatch("update", item);
+        if (onupdate) onupdate(item);
     }
 
     function handleRemove() {
-        dispatch("remove", item.id);
+        if (onremove) onremove(item.id);
     }
 
     function handleItemNameInput() {
         handleUpdate();
-        
+
         if (item.name.trim().length > 0) {
-            filteredItems = $items.filter(availableItem =>
-                availableItem.name.toLowerCase().includes(item.name.toLowerCase())
+            filteredItems = $items.filter((availableItem) =>
+                availableItem.name
+                    .toLowerCase()
+                    .includes(item.name.toLowerCase()),
             );
             showSuggestions = filteredItems.length > 0;
         } else {
@@ -41,7 +49,7 @@
         item.rate = suggestedItem.rate;
         item.description = suggestedItem.description || "";
         item.unit = suggestedItem.unit || "pcs";
-        
+
         showSuggestions = false;
         filteredItems = [];
         handleUpdate();
@@ -49,12 +57,16 @@
 </script>
 
 <!-- Item row with collapsible description -->
-<div class="border-b border-slate-100 hover:bg-slate-50 transition-colors group">
+<div
+    class="border-b border-slate-100 hover:bg-slate-50 transition-colors group"
+>
     <!-- Main row: Name, Rate, Qty, Line Total -->
     <div class="py-4 px-4 grid grid-cols-12 gap-4 items-start">
         <!-- Drag Handle -->
         <div class="col-span-1 flex items-center justify-center pt-1">
-            <div class="flex-shrink-0 flex items-center justify-center text-slate-300 group-hover:text-slate-400 cursor-move">
+            <div
+                class="flex-shrink-0 flex items-center justify-center text-slate-300 group-hover:text-slate-400 cursor-move"
+            >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
@@ -76,7 +88,10 @@
                 bind:value={item.name}
                 oninput={handleItemNameInput}
                 onfocus={() => {
-                    if (item.name.trim().length > 0 && filteredItems.length > 0) {
+                    if (
+                        item.name.trim().length > 0 &&
+                        filteredItems.length > 0
+                    ) {
                         showSuggestions = true;
                     }
                 }}
@@ -88,10 +103,12 @@
                 placeholder="Item name (start typing to search)"
                 class="block w-full bg-white border border-slate-200 rounded px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 text-sm font-medium transition-colors"
             />
-            
+
             <!-- Autocomplete Suggestions Dropdown -->
             {#if showSuggestions && filteredItems.length > 0}
-                <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded shadow-lg z-50 max-h-48 overflow-y-auto">
+                <div
+                    class="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded shadow-lg z-50 max-h-48 overflow-y-auto"
+                >
                     {#each filteredItems as suggestedItem (suggestedItem.id)}
                         <button
                             type="button"
@@ -99,9 +116,14 @@
                             class="w-full text-left px-3 py-2 hover:bg-emerald-50 transition-colors border-b border-slate-100 last:border-b-0"
                         >
                             <div class="flex flex-col gap-0.5">
-                                <div class="font-medium text-slate-900 text-sm">{suggestedItem.name}</div>
+                                <div class="font-medium text-slate-900 text-sm">
+                                    {suggestedItem.name}
+                                </div>
                                 <div class="text-xs text-slate-500">
-                                    {formatCurrency(suggestedItem.rate, currency)} • {suggestedItem.unit || 'pcs'}
+                                    {formatCurrency(
+                                        suggestedItem.rate,
+                                        currency,
+                                    )} • {suggestedItem.unit || "pcs"}
                                 </div>
                             </div>
                         </button>
@@ -189,4 +211,3 @@
         <div class="col-span-5"></div>
     </div>
 </div>
-

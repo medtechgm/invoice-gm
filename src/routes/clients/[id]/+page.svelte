@@ -25,13 +25,17 @@
         countrySearch
             ? COUNTRY_CODES.filter(
                   (c) =>
-                      c.country.toLowerCase().includes(countrySearch.toLowerCase()) ||
-                      c.code.includes(countrySearch)
+                      c.country
+                          .toLowerCase()
+                          .includes(countrySearch.toLowerCase()) ||
+                      c.code.includes(countrySearch),
               )
-            : COUNTRY_CODES
+            : COUNTRY_CODES,
     );
 
-    let selectedCountry = $derived(COUNTRY_CODES.find((c) => c.code === countryCode));
+    let selectedCountry = $derived(
+        COUNTRY_CODES.find((c) => c.code === countryCode),
+    );
 
     function selectCountry(code: string) {
         countryCode = code;
@@ -44,7 +48,7 @@
             companyName = client.companyName || "";
             contactName = client.contactName || "";
             email = client.email || "";
-            
+
             // Parse phone into country code and number
             const phoneStr = client.phone || "";
             const match = phoneStr.match(/^(\+\d{1,3})(.*)$/);
@@ -54,7 +58,7 @@
             } else {
                 phone = phoneStr;
             }
-            
+
             website = client.website || "";
             taxId = client.taxId || "";
             address = client.address || "";
@@ -86,8 +90,11 @@
     <title>Edit Client - InvoiceMe App</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">        <!-- Header -->
+<div
+    class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8"
+>
+    <div class="max-w-3xl mx-auto">
+        <!-- Header -->
         <div class="flex items-center gap-4 mb-8">
             <a
                 href="/clients"
@@ -111,7 +118,9 @@
             </a>
             <div>
                 <h1 class="text-3xl font-bold text-slate-900">Edit Client</h1>
-                <p class="text-slate-500 text-sm mt-0.5">Update client information</p>
+                <p class="text-slate-500 text-sm mt-0.5">
+                    Update client information
+                </p>
             </div>
         </div>
 
@@ -135,11 +144,14 @@
             >
                 <!-- Company Section -->
                 <div class="p-6 sm:p-8 border-b border-slate-100">
-                    <h2 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-                        <span class="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                    <h2
+                        class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2"
+                    >
+                        <span class="w-1 h-1 bg-emerald-500 rounded-full"
+                        ></span>
                         Company Information
                     </h2>
-                    
+
                     <div class="space-y-4">
                         <div>
                             <label
@@ -195,8 +207,11 @@
 
                 <!-- Contact Section -->
                 <div class="p-6 sm:p-8 border-b border-slate-100">
-                    <h2 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-                        <span class="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                    <h2
+                        class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2"
+                    >
+                        <span class="w-1 h-1 bg-emerald-500 rounded-full"
+                        ></span>
                         Contact Information
                     </h2>
 
@@ -218,7 +233,10 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">
+                            <label
+                                for="phone"
+                                class="block text-sm font-medium text-slate-700 mb-2"
+                            >
                                 Phone Number
                             </label>
                             <div class="flex gap-3">
@@ -226,18 +244,23 @@
                                 <div class="relative w-[160px]">
                                     <button
                                         type="button"
-                                        onclick={() => (showCountryDropdown = !showCountryDropdown)}
+                                        onclick={() =>
+                                            (showCountryDropdown =
+                                                !showCountryDropdown)}
                                         class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-colors bg-white text-left flex items-center justify-between hover:border-slate-400"
                                     >
                                         <span class="text-sm font-medium">
                                             {#if selectedCountry}
-                                                {selectedCountry.flag} {selectedCountry.code}
+                                                {selectedCountry.flag}
+                                                {selectedCountry.code}
                                             {:else}
                                                 +1
                                             {/if}
                                         </span>
                                         <svg
-                                            class="w-4 h-4 text-slate-500 transition-transform {showCountryDropdown ? 'rotate-180' : ''}"
+                                            clas 4 text-slate-500 transition-transform {showCountryDropdown
+                                                ? 'rotate-180'
+                                                : ''}"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -252,24 +275,37 @@
                                     </button>
 
                                     {#if showCountryDropdown}
-                                        <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-300 rounded-lg shadow-lg z-10">
+                                        <div
+                                            class="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-300 rounded-lg shadow-lg z-10"
+                                        >
                                             <input
                                                 type="text"
                                                 placeholder="Search country..."
                                                 bind:value={countrySearch}
                                                 class="w-full px-3 py-2 border-b border-slate-200 rounded-t-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/10 text-sm"
-                                                autofocus
+                                                use:focusOnMount
                                             />
-                                            <div class="max-h-48 overflow-y-auto">
+                                            <div
+                                                class="max-h-48 overflow-y-auto"
+                                            >
                                                 {#each filteredCountries as { code, country, flag }}
                                                     <button
                                                         type="button"
-                                                        onclick={() => selectCountry(code)}
+                                                        onclick={() =>
+                                                            selectCountry(code)}
                                                         class="w-full text-left px-4 py-2 hover:bg-emerald-50 transition-colors text-sm border-b border-slate-100 last:border-0 flex items-center gap-2"
                                                     >
-                                                        <span class="text-lg">{flag}</span>
-                                                        <span class="font-medium">{code}</span>
-                                                        <span class="text-slate-500">{country}</span>
+                                                        <span class="text-lg"
+                                                            >{flag}</span
+                                                        >
+                                                        <span
+                                                            class="font-medium"
+                                                            >{code}</span
+                                                        >
+                                                        <span
+                                                            class="text-slate-500"
+                                                            >{country}</span
+                                                        >
                                                     </button>
                                                 {/each}
                                             </div>
@@ -308,8 +344,11 @@
 
                 <!-- Address Section -->
                 <div class="p-6 sm:p-8 border-b border-slate-100">
-                    <h2 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-                        <span class="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                    <h2
+                        class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2"
+                    >
+                        <span class="w-1 h-1 bg-emerald-500 rounded-full"
+                        ></span>
                         Address
                     </h2>
 
@@ -332,8 +371,11 @@
 
                 <!-- Notes Section -->
                 <div class="p-6 sm:p-8 border-b border-slate-100">
-                    <h2 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-                        <span class="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                    <h2
+                        class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2"
+                    >
+                        <span class="w-1 h-1 bg-emerald-500 rounded-full"
+                        ></span>
                         Additional Notes
                     </h2>
 
@@ -355,13 +397,17 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="px-6 sm:px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                <div
+                    class="px-6 sm:px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3"
+                >
                     <AppButton
                         type="button"
                         variant="secondary"
                         onclick={() => goto("/clients")}>Cancel</AppButton
                     >
-                    <AppButton type="submit" variant="primary">Update Client</AppButton>
+                    <AppButton type="submit" variant="primary"
+                        >Update Client</AppButton
+                    >
                 </div>
             </form>
         {/if}

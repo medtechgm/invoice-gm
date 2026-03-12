@@ -6,13 +6,13 @@
   import { getCurrencySymbol } from "$lib/constants/currencies";
   import AppButton from "$lib/components/AppButton.svelte";
 
-  let name = "";
-  let sku = "";
-  let category = "";
-  let description = "";
-  let rate = 0;
-  let unit = "pcs";
-  let showScannerNote = false;
+  let name = $state("");
+  let sku = $state("");
+  let category = $state("");
+  let description = $state("");
+  let rate = $state(0);
+  let unit = $state("pcs");
+  let showScannerNote = $state(false);
 
   function handleSubmit(e: Event) {
     e.preventDefault();
@@ -68,7 +68,7 @@
     }
   }
 
-  $: currencySymbol = getCurrencySymbol($settings.defaultCurrency);
+  let currencySymbol = $derived(getCurrencySymbol($settings.defaultCurrency));
 </script>
 
 <svelte:head>

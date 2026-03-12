@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import type { Estimate } from '../models/estimate';
 import { v4 as uuidv4 } from 'uuid';
+import { logDocumentAction } from './history';
 
 export const estimates = writable<Estimate[]>([]);
 
@@ -45,6 +46,13 @@ export const addEstimate = (estimate: Omit<Estimate, 'id'>) => {
     // Optimistic UI update
     estimates.update(e => [...e, newEstimate]);
 
+    logDocumentAction({
+        documentType: 'estimate',
+        documentId: id,
+        action: 'created',
+        description: `Estimate ${estimate.estimateNumber} created.`
+    });
+
     // Background DB update
     if (supabaseClient && userId) {
         supabaseClient.from('estimates').insert([{
@@ -76,6 +84,15 @@ export const addEstimate = (estimate: Omit<Estimate, 'id'>) => {
 
 export const updateEstimate = (id: string, updates: Partial<Estimate>) => {
     estimates.update(e => e.map(est => est.id === id ? { ...est, ...updates } : est));
+
+    if (updates.status) {
+        logDocumentAction({
+            documentType: 'estimate',
+            documentId: id,
+            action: 'status_updated',
+            description: `Status changed to ${updates.status}.`
+        });
+    }
 
     if (supabaseClient) {
         const dbUpdates: any = {};

@@ -13,9 +13,8 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
                 throw redirect(303, '/reset-password')
             }
 
-            // Email verification flow: sign out immediately so user must log in manually
-            await supabase.auth.signOut()
-            throw redirect(303, '/login?message=Email verified! Please sign in.')
+            // Email verification flow: Go straight to the dashboard!
+            throw redirect(303, '/dashboard')
         }
     }
 

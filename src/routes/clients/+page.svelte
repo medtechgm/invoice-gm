@@ -152,5 +152,5 @@
     description={`Are you sure you want to delete ${clientToDelete?.companyName}? This action cannot be undone.`}
     confirmText="Delete"
     destructive={true}
-    on:confirm={handleDelete}
+    onconfirm={handleDelete}
 />

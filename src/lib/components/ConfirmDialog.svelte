@@ -1,23 +1,33 @@
 <script lang="ts">
     import AppButton from "./AppButton.svelte";
 
-    export let open = false;
-    export let title: string;
-    export let description: string;
-    export let confirmText = "Confirm";
-    export let cancelText = "Cancel";
-    export let destructive = false;
-
-    import { createEventDispatcher } from "svelte";
-    const dispatch = createEventDispatcher();
+    let {
+        open = $bindable(false),
+        title,
+        description,
+        confirmText = "Confirm",
+        cancelText = "Cancel",
+        destructive = false,
+        onconfirm,
+        oncancel,
+    } = $props<{
+        open?: boolean;
+        title: string;
+        description: string;
+        confirmText?: string;
+        cancelText?: string;
+        destructive?: boolean;
+        onconfirm?: () => void;
+        oncancel?: () => void;
+    }>();
 
     function handleConfirm() {
-        dispatch("confirm");
+        if (onconfirm) onconfirm();
         open = false;
     }
 
     function handleCancel() {
-        dispatch("cancel");
+        if (oncancel) oncancel();
         open = false;
     }
 </script>

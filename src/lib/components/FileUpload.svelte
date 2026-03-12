@@ -1,12 +1,21 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
-    const dispatch = createEventDispatcher();
-
-    export let value: string | null = null;
-    export let label: string = "Upload a file";
-    export let sublabel: string = "or drag and drop here";
-    export let accept: string = "image/*";
-    export let formatHint: string = "PDF, JPG, PNG, TXT, DOC";
+    let {
+        value = $bindable(null),
+        label = "Upload a file",
+        sublabel = "or drag and drop here",
+        accept = "image/*",
+        formatHint = "PDF, JPG, PNG, TXT, DOC",
+        onupload,
+        onremove,
+    } = $props<{
+        value?: string | null;
+        label?: string;
+        sublabel?: string;
+        accept?: string;
+        formatHint?: string;
+        onupload?: (url: string) => void;
+        onremove?: () => void;
+    }>();
 
     let fileInput: HTMLInputElement;
 
@@ -17,26 +26,28 @@
             const reader = new FileReader();
             reader.onload = (event) => {
                 const result = event.target?.result as string;
-                dispatch("upload", result);
+                value = result;
+                if (onupload) onupload(result);
             };
             reader.readAsDataURL(file);
         }
     }
 
     function triggerUpload() {
-        fileInput.click();
+        if (fileInput) fileInput.click();
     }
 
     function removeFile(e: MouseEvent) {
         e.stopPropagation();
-        dispatch("remove");
+        value = null;
+        if (onremove) onremove();
     }
 </script>
 
 <div
     class="relative group cursor-pointer"
-    on:click={triggerUpload}
-    on:keydown={(e) => e.key === "Enter" && triggerUpload()}
+    onclick={triggerUpload}
+    onkeydown={(e) => e.key === "Enter" && triggerUpload()}
     role="button"
     tabindex="0"
 >
@@ -45,7 +56,7 @@
         {accept}
         class="hidden"
         bind:this={fileInput}
-        on:change={handleFileChange}
+        onchange={handleFileChange}
     />
 
     <div
@@ -64,7 +75,7 @@
                 />
                 <button
                     type="button"
-                    on:click={removeFile}
+                    onclick={removeFile}
                     title="Remove file"
                     class="absolute top-2 right-2 p-1.5 bg-white shadow-sm border border-slate-200 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
                 >
