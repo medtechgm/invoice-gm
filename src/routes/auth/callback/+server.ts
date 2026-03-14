@@ -15,9 +15,12 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
 
             // Email verification flow: Go straight to the dashboard!
             throw redirect(303, '/dashboard')
+        } else {
+            // Redirect with the actual error message
+            throw redirect(303, `/login?error=${encodeURIComponent(error.message)}`)
         }
     }
 
     // return the user to an error page with instructions
-    throw redirect(303, '/login?error=auth_callback_failed')
+    throw redirect(303, '/login?error=auth_callback_missing_code')
 }

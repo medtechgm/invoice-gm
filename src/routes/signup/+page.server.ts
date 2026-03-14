@@ -23,6 +23,12 @@ export const actions: Actions = {
             return fail(500, { error: error.message })
         }
 
+        // Check if the user already exists. If email enumeration protection is ON,
+        // Supabase returns a user with an empty identities array.
+        if (data.user && data.user.identities && data.user.identities.length === 0) {
+            return fail(400, { error: 'An account with this email already exists. Please log in.' })
+        }
+
         if (data.session) {
             throw redirect(303, '/dashboard')
         }
