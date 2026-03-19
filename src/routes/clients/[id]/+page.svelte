@@ -6,6 +6,10 @@
     import { COUNTRY_CODES } from "$lib/constants/countries";
     import { onMount } from "svelte";
 
+    function focusOnMount(node: HTMLElement) {
+        node.focus();
+    }
+
     const clientId = $page.params.id as string;
     const client = $derived($clients.find((c) => c.id === clientId));
 
@@ -258,7 +262,7 @@
                                             {/if}
                                         </span>
                                         <svg
-                                            clas 4 text-slate-500 transition-transform {showCountryDropdown
+                                            class="w-4 h-4 text-slate-500 transition-transform {showCountryDropdown
                                                 ? 'rotate-180'
                                                 : ''}"
                                             fill="none"
@@ -413,14 +417,3 @@
         {/if}
     </div>
 </div>
-
-
-
-
-
-1. feat: Add intelligent item autocomplete to line items
-2. fix: Update Svelte 5 event handler syntax
-3. fix: Resolve Svelte 5 reactive statement deprecation warnings
-4. fix: Resolve accessibility and a11y warnings
-5. fix: Resolve InvoiceForm state reference warnings
-6. fix: Correct missing closing parenthesis in items page

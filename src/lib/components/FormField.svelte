@@ -1,4 +1,8 @@
 <script lang="ts">
+    import type { Snippet } from "svelte";
+
+    type Option = { value: string | number; label: string };
+
     let {
         id,
         label,
@@ -7,52 +11,96 @@
         placeholder = "",
         required = false,
         rows = 3,
+        error = undefined,
+        hint = undefined,
+        options = [],
+        children,
     } = $props<{
         id: string;
         label: string;
         value?: string | number;
-        type?: "text" | "email" | "number" | "date" | "tel" | "textarea";
+        type?:
+            | "text"
+            | "email"
+            | "number"
+            | "date"
+            | "tel"
+            | "textarea"
+            | "select"
+            | "url";
         placeholder?: string;
         required?: boolean;
         rows?: number;
+        error?: string;
+        hint?: string;
+        options?: Option[];
+        children?: Snippet;
     }>();
-
-    const inputClass =
-        "block w-full rounded-md border-0 py-2.5 px-3 text-base sm:text-sm text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:leading-6";
 </script>
 
-<div class="mb-4 sm:mb-6">
-    <label
-        for={id}
-        class="block text-sm sm:text-base font-medium leading-6 text-slate-700 mb-2"
-    >
+<div class="space-y-1.5">
+    <label for={id} class="block text-sm font-medium text-slate-700">
         {label}
         {#if required}
-            <span class="text-red-500">*</span>
+            <span class="text-red-500 ml-0.5">*</span>
         {/if}
     </label>
 
-    <div class="relative rounded-md shadow-sm">
-        {#if type === "textarea"}
-            <textarea
-                {id}
-                name={id}
-                bind:value
-                {placeholder}
-                {required}
-                {rows}
-                class="{inputClass} resize-none"
-            ></textarea>
-        {:else}
-            <input
-                {type}
-                {id}
-                name={id}
-                bind:value
-                {placeholder}
-                {required}
-                class={inputClass}
-            />
-        {/if}
-    </div>
+    {#if type === "textarea"}
+        <textarea
+            {id}
+            name={id}
+            bind:value
+            {placeholder}
+            {required}
+            {rows}
+            class="input-base resize-none {error ? 'input-error' : ''}"
+        ></textarea>
+    {:else if type === "select"}
+        <select
+            {id}
+            name={id}
+            bind:value
+            {required}
+            class="input-base {error ? 'input-error' : ''}"
+        >
+            {#if children}
+                {@render children()}
+            {:else}
+                {#each options as opt}
+                    <option value={opt.value}>{opt.label}</option>
+                {/each}
+            {/if}
+        </select>
+    {:else}
+        <input
+            {type}
+            {id}
+            name={id}
+            bind:value
+            {placeholder}
+            {required}
+            class="input-base {error ? 'input-error' : ''}"
+        />
+    {/if}
+
+    {#if error}
+        <p class="text-xs text-red-600 flex items-center gap-1">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                class="w-3.5 h-3.5 flex-shrink-0"
+            >
+                <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z"
+                    clip-rule="evenodd"
+                />
+            </svg>
+            {error}
+        </p>
+    {:else if hint}
+        <p class="text-xs text-slate-500">{hint}</p>
+    {/if}
 </div>

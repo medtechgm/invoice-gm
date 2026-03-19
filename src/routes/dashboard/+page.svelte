@@ -5,8 +5,10 @@
     import { estimates } from "$lib/stores/estimates";
     import StatusBadge from "$lib/components/StatusBadge.svelte";
     import AppButton from "$lib/components/AppButton.svelte";
+    import PageHeader from "$lib/components/PageHeader.svelte";
+    import StatCard from "$lib/components/StatCard.svelte";
     import { formatCurrency, formatDate } from "$lib/utils/formatters";
-    import { fade, slide, fly } from "svelte/transition";
+    import { fade } from "svelte/transition";
     import { goto } from "$app/navigation";
 
     let { data } = $props();
@@ -15,11 +17,6 @@
     // Derived statistics
     let totalInvoiced = $derived(
         $invoices.reduce((sum, inv) => sum + calculateTotal(inv), 0),
-    );
-    let totalPaid = $derived(
-        $invoices
-            .filter((inv) => inv.status === "paid")
-            .reduce((sum, inv) => sum + calculateTotal(inv), 0),
     );
     let totalPending = $derived(
         $invoices
@@ -33,7 +30,11 @@
     );
 
     let recentInvoices = $derived(
-        [...$invoices].sort((a, b) => new Date(b.dateIssued).getTime() - new Date(a.dateIssued).getTime())
+        [...$invoices].sort(
+            (a, b) =>
+                new Date(b.dateIssued).getTime() -
+                new Date(a.dateIssued).getTime(),
+        ),
     );
 
     function calculateTotal(invoice: any) {
@@ -50,289 +51,310 @@
             (invoice.discount || 0)
         );
     }
-
-    // Chart data simulation
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-    const revenueData = [4500, 5200, 4800, 6100, 5900, 7200];
-    const maxRevenue = Math.max(...revenueData);
-
-    let hoveringBar = $state<number | null>(null);
-
-    function handleInvoiceClick(id: string) {
-        goto(`/invoices/${id}/preview`);
-    }
 </script>
 
 <svelte:head>
     <title>Dashboard | Invoicer App</title>
 </svelte:head>
 
-<div
-    class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-10"
-    in:fade={{ duration: 400 }}
->
-    <div class="max-w-7xl mx-auto">
+<div in:fade={{ duration: 300 }}>
+    <!-- Page Header -->
+    <PageHeader title="Dashboard" subtitle="Your business at a glance">
+        <AppButton href="/invoices/new" variant="primary" size="sm">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4 mr-1.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                />
+            </svg>
+            New Invoice
+        </AppButton>
+        <AppButton href="/estimates/new" variant="outline" size="sm">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4 mr-1.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+            </svg>
+            New Estimate
+        </AppButton>
+    </PageHeader>
+
+    <!-- Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-6 sm:mb-8">
+        <StatCard
+            title="Total Invoiced"
+            value={formatCurrency(totalInvoiced, $settings.defaultCurrency)}
+            linkText="View invoices"
+            linkHref="/invoices"
+            icon="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+        />
+        <StatCard
+            title="Pending Payment"
+            value={formatCurrency(totalPending, $settings.defaultCurrency)}
+            linkText="View pending"
+            linkHref="/invoices?status=pending"
+            accent="blue"
+            icon="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+        />
+        <StatCard
+            title="Overdue"
+            value={formatCurrency(totalOverdue, $settings.defaultCurrency)}
+            linkText="View overdue"
+            linkHref="/invoices?status=overdue"
+            accent="red"
+            icon="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+        />
     </div>
-        <!-- Main Content -->
-        <div class="space-y-8">
-            <!-- Greeting & Overview Section -->
-            <div>
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
-                    <div>
-                        <h1 class="text-3xl font-bold text-slate-900">Good afternoon</h1>
-                        <p class="text-slate-500 text-sm mt-2">
-                            <span class="inline-flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M8.603 3.799A4.823 4.823 0 0112 2.25c1.357 0 2.573.455 3.397 1.226.243.264.585.42.92.42.338 0 .678-.156.92-.42A4.823 4.823 0 0121.75 2.25h.007a.75.75 0 01.75.75V5a6 6 0 00-6-6h-.007a.75.75 0 00-.75.75v.003zM12 12a6 6 0 016-6H12a6 6 0 00-6 6v6a6 6 0 006 6h6a6 6 0 006-6v-.007a.75.75 0 01.75-.75H21a.75.75 0 01.75.75v.007a7.5 7.5 0 01-7.5 7.5h-6a7.5 7.5 0 01-7.5-7.5V12Z" clip-rule="evenodd" />
-                                </svg>
-                                Free trial. 14 days remaining.
-                            </span>
-                            <span class="text-blue-500 font-medium">Upgrade now and save.</span>
+
+    <!-- Recent Invoices & Estimates -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <!-- Recent Invoices -->
+        <div class="section-card">
+            <div
+                class="flex items-center justify-between px-5 py-4 border-b border-slate-200"
+            >
+                <h2 class="section-title">Recent Invoices</h2>
+                <a
+                    href="/invoices"
+                    class="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                    >View all →</a
+                >
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-slate-50">
+                            <th
+                                class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                >Number</th
+                            >
+                            <th
+                                class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                >Client</th
+                            >
+                            <th
+                                class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                >Status</th
+                            >
+                            <th
+                                class="text-right px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                >Amount</th
+                            >
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {#each recentInvoices.slice(0, 5) as invoice (invoice.id)}
+                            <tr
+                                class="hover:bg-slate-50 transition-colors cursor-pointer"
+                                onclick={() =>
+                                    goto(`/invoices/${invoice.id}/preview`)}
+                            >
+                                <td
+                                    class="px-5 py-3 text-sm font-semibold text-emerald-600"
+                                >
+                                    {invoice.invoiceNumber ||
+                                        `INV-${invoice.id.slice(0, 6)}`}
+                                </td>
+                                <td class="px-5 py-3 text-sm text-slate-600">
+                                    {invoice.client?.companyName || "Unknown"}
+                                </td>
+                                <td class="px-5 py-3 text-sm">
+                                    <StatusBadge status={invoice.status} />
+                                </td>
+                                <td
+                                    class="px-5 py-3 text-sm font-bold text-slate-900 text-right"
+                                >
+                                    {formatCurrency(
+                                        calculateTotal(invoice),
+                                        invoice.currency,
+                                    )}
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+                {#if recentInvoices.length === 0}
+                    <div class="px-5 py-10 text-center">
+                        <p class="text-sm text-slate-500">
+                            No invoices yet. <a
+                                href="/invoices/new"
+                                class="text-emerald-600 hover:text-emerald-700 font-medium"
+                                >Create one now</a
+                            >
                         </p>
                     </div>
-
-                    <div class="flex items-center gap-3">
-                        <AppButton
-                            href="/invoices/new"
-                            variant="primary"
-                            class="!rounded-lg"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            New Invoice
-                        </AppButton>
-                        <AppButton
-                            href="/estimates/new"
-                            variant="primary"
-                            class="!rounded-lg"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            New Estimate
-                        </AppButton>
-                        <AppButton
-                            href="/clients/new"
-                            variant="primary"
-                            class="!rounded-lg"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            Add Client
-                        </AppButton>
-                    </div>
-                </div>
-
-                <!-- Overview with filter -->
-                <div class="flex items-center gap-4 mb-6">
-                    <h2 class="text-xl font-bold text-slate-900">Overview</h2>
-                    <button class="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        Last 30 Days
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 3-Column Metrics Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Invoiced Card -->
-                <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-sm font-medium text-slate-600">Invoiced</h3>
-                    </div>
-                    <p class="text-3xl font-bold text-slate-900 mb-4">{formatCurrency(totalInvoiced, $settings.defaultCurrency)}</p>
-                    <a href="/invoices" class="text-sm text-blue-500 hover:text-blue-600 font-medium">View invoiced →</a>
-                </div>
-
-                <!-- Owing/Pending Card -->
-                <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-sm font-medium text-slate-600">Owing</h3>
-                    </div>
-                    <p class="text-3xl font-bold text-slate-900 mb-4">{formatCurrency(totalPending, $settings.defaultCurrency)}</p>
-                    <a href="/invoices?status=pending" class="text-sm text-blue-500 hover:text-blue-600 font-medium">View owing →</a>
-                </div>
-
-                <!-- Overdue Card -->
-                <div class="bg-white rounded-lg border border-slate-200 p-6 shadow-sm">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-sm font-medium text-slate-600">Overdue</h3>
-                    </div>
-                    <p class="text-3xl font-bold text-slate-900 mb-4">{formatCurrency(totalOverdue, $settings.defaultCurrency)}</p>
-                    <a href="/invoices?status=overdue" class="text-sm text-blue-500 hover:text-blue-600 font-medium">View overdue →</a>
-                </div>
-            </div>
-
-            <!-- Side-by-side Tables Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Recent Invoices Table -->
-                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-200 bg-white">
-                        <h2 class="text-lg font-bold text-slate-900">Recent Invoices</h2>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-slate-200 bg-slate-50">
-                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Number</th>
-                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Client</th>
-                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                                    <th class="text-right px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                {#each recentInvoices.slice(0, 5) as invoice (invoice.id)}
-                                    <tr class="hover:bg-slate-50 transition-colors">
-                                        <td class="px-6 py-3 text-sm font-semibold text-slate-900">
-                                            <a href="/invoices/{invoice.id}" class="text-blue-500 hover:text-blue-600">
-                                                {invoice.invoiceNumber || `INV-${invoice.id.slice(0, 6)}`}
-                                            </a>
-                                        </td>
-                                        <td class="px-6 py-3 text-sm text-slate-600">
-                                            {invoice.client?.companyName || "Unknown"}
-                                        </td>
-                                        <td class="px-6 py-3 text-sm">
-                                            <StatusBadge status={invoice.status} />
-                                        </td>
-                                        <td class="px-6 py-3 text-sm font-bold text-slate-900 text-right">
-                                            {formatCurrency(calculateTotal(invoice), invoice.currency)}
-                                        </td>
-                                    </tr>
-                                {/each}
-                            </tbody>
-                        </table>
-
-                        {#if recentInvoices.length === 0}
-                            <div class="px-6 py-8 text-center text-slate-500">
-                                <p class="text-sm">No invoices yet. <a href="/invoices/new" class="text-blue-500 hover:text-blue-600 font-medium">Create one now</a></p>
-                            </div>
-                        {/if}
-                    </div>
-                </div>
-
-                <!-- Recent Estimates Table -->
-                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-200 bg-white">
-                        <h2 class="text-lg font-bold text-slate-900">Recent Estimates</h2>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-slate-200 bg-slate-50">
-                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Number</th>
-                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Client</th>
-                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                                    <th class="text-right px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                {#each $estimates.slice(0, 5) as estimate (estimate.id)}
-                                    <tr class="hover:bg-slate-50 transition-colors">
-                                        <td class="px-6 py-3 text-sm font-semibold text-slate-900">
-                                            <a href="/estimates/{estimate.id}" class="text-blue-500 hover:text-blue-600">
-                                                {estimate.estimateNumber || `EST-${estimate.id.slice(0, 6)}`}
-                                            </a>
-                                        </td>
-                                        <td class="px-6 py-3 text-sm text-slate-600">
-                                            {estimate.client?.companyName || "Unknown"}
-                                        </td>
-                                        <td class="px-6 py-3 text-sm">
-                                            <StatusBadge status={estimate.status} />
-                                        </td>
-                                        <td class="px-6 py-3 text-sm font-bold text-slate-900 text-right">
-                                            {formatCurrency(calculateTotal(estimate), estimate.currency)}
-                                        </td>
-                                    </tr>
-                                {/each}
-                            </tbody>
-                        </table>
-
-                        {#if $estimates.length === 0}
-                            <div class="px-6 py-8 text-center text-slate-500">
-                                <p class="text-sm">You have no estimates yet. <a href="/estimates/new" class="text-blue-500 hover:text-blue-600 font-medium">Create an estimate</a></p>
-                            </div>
-                        {/if}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity Section -->
-            <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-200 bg-white">
-                    <h2 class="text-lg font-bold text-slate-900">Recent activity</h2>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b border-slate-200 bg-slate-50">
-                                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Event</th>
-                                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Description</th>
-                                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Document</th>
-                                <th class="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            {#each recentInvoices.slice(0, 3) as invoice (invoice.id)}
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="px-6 py-3 text-sm font-medium text-slate-900">
-                                        {#if invoice.status === 'viewed'}
-                                            Invoice PDF viewed
-                                        {:else if invoice.status === 'paid'}
-                                            Invoice marked paid
-                                        {:else if invoice.status === 'sent'}
-                                            Invoice sent
-                                        {:else}
-                                            Invoice {invoice.status}
-                                        {/if}
-                                    </td>
-                                    <td class="px-6 py-3 text-sm text-slate-600">
-                                        Invoice {invoice.invoiceNumber || `INV-${invoice.id.slice(0, 6)}`} was {invoice.status} by {invoice.client?.contactName || 'client'}
-                                    </td>
-                                    <td class="px-6 py-3 text-sm">
-                                        <a href="/invoices/{invoice.id}" class="text-blue-500 hover:text-blue-600 font-medium">
-                                            {invoice.invoiceNumber || `INV-${invoice.id.slice(0, 6)}`}
-                                        </a>
-                                    </td>
-                                    <td class="px-6 py-3 text-sm text-slate-600">
-                                        {formatDate(new Date(invoice.dateIssued))}
-                                    </td>
-                                </tr>
-                            {/each}
-                        </tbody>
-                    </table>
-
-                    {#if recentInvoices.length === 0}
-                        <div class="px-6 py-12 text-center text-slate-500">
-                            <p class="text-sm">No activity yet. Create your first invoice to get started.</p>
-                        </div>
-                    {/if}
-                </div>
+                {/if}
             </div>
         </div>
-</div>
 
+        <!-- Recent Estimates -->
+        <div class="section-card">
+            <div
+                class="flex items-center justify-between px-5 py-4 border-b border-slate-200"
+            >
+                <h2 class="section-title">Recent Estimates</h2>
+                <a
+                    href="/estimates"
+                    class="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                    >View all →</a
+                >
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-slate-50">
+                            <th
+                                class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                >Number</th
+                            >
+                            <th
+                                class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                >Client</th
+                            >
+                            <th
+                                class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                >Status</th
+                            >
+                            <th
+                                class="text-right px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                >Amount</th
+                            >
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {#each $estimates.slice(0, 5) as estimate (estimate.id)}
+                            <tr
+                                class="hover:bg-slate-50 transition-colors cursor-pointer"
+                                onclick={() =>
+                                    goto(`/estimates/${estimate.id}/preview`)}
+                            >
+                                <td
+                                    class="px-5 py-3 text-sm font-semibold text-emerald-600"
+                                >
+                                    {estimate.estimateNumber ||
+                                        `EST-${estimate.id.slice(0, 6)}`}
+                                </td>
+                                <td class="px-5 py-3 text-sm text-slate-600">
+                                    {estimate.client?.companyName || "Unknown"}
+                                </td>
+                                <td class="px-5 py-3 text-sm">
+                                    <StatusBadge status={estimate.status} />
+                                </td>
+                                <td
+                                    class="px-5 py-3 text-sm font-bold text-slate-900 text-right"
+                                >
+                                    {formatCurrency(
+                                        calculateTotal(estimate),
+                                        estimate.currency,
+                                    )}
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+                {#if $estimates.length === 0}
+                    <div class="px-5 py-10 text-center">
+                        <p class="text-sm text-slate-500">
+                            No estimates yet. <a
+                                href="/estimates/new"
+                                class="text-emerald-600 hover:text-emerald-700 font-medium"
+                                >Create one now</a
+                            >
+                        </p>
+                    </div>
+                {/if}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="section-card">
+        <div class="px-5 py-4 border-b border-slate-200">
+            <h2 class="section-title">Recent Activity</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50">
+                        <th
+                            class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                            >Event</th
+                        >
+                        <th
+                            class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider hidden sm:table-cell"
+                            >Description</th
+                        >
+                        <th
+                            class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                            >Document</th
+                        >
+                        <th
+                            class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider hidden sm:table-cell"
+                            >Date</th
+                        >
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {#each recentInvoices.slice(0, 5) as invoice (invoice.id)}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td
+                                class="px-5 py-3 text-sm font-medium text-slate-900"
+                            >
+                                {#if invoice.status === "viewed"}Invoice viewed
+                                {:else if invoice.status === "paid"}Invoice paid
+                                {:else if invoice.status === "sent"}Invoice sent
+                                {:else}Invoice {invoice.status}{/if}
+                            </td>
+                            <td
+                                class="px-5 py-3 text-sm text-slate-500 hidden sm:table-cell"
+                            >
+                                {invoice.invoiceNumber ||
+                                    `INV-${invoice.id.slice(0, 6)}`} by {invoice
+                                    .client?.contactName || "client"}
+                            </td>
+                            <td class="px-5 py-3 text-sm">
+                                <a
+                                    href="/invoices/{invoice.id}"
+                                    class="text-emerald-600 hover:text-emerald-700 font-medium"
+                                >
+                                    {invoice.invoiceNumber ||
+                                        `INV-${invoice.id.slice(0, 6)}`}
+                                </a>
+                            </td>
+                            <td
+                                class="px-5 py-3 text-sm text-slate-500 hidden sm:table-cell"
+                            >
+                                {formatDate(new Date(invoice.dateIssued))}
+                            </td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+            {#if recentInvoices.length === 0}
+                <div class="px-5 py-12 text-center">
+                    <p class="text-sm text-slate-500">
+                        No activity yet. Create your first invoice to get
+                        started.
+                    </p>
+                </div>
+            {/if}
+        </div>
+    </div>
+</div>

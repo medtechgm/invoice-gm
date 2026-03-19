@@ -13,6 +13,8 @@
         columns = [],
         emptyMessage = "No records found.",
         emptyStateAction,
+        title = undefined,
+        titleAction = undefined,
         row: rowSnippet,
         onRowClick,
     } = $props<{
@@ -20,6 +22,8 @@
         columns: Column[];
         emptyMessage?: string;
         emptyStateAction?: Snippet;
+        title?: string;
+        titleAction?: Snippet;
         row?: Snippet<[any, number]>;
         onRowClick?: (item: any) => void;
     }>();
@@ -34,9 +38,22 @@
     const visibleColumns = columns.filter((col) => !col.hideOnMobile);
 </script>
 
-<div
-    class="w-full bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200 overflow-hidden"
->
+<div class="section-card">
+    {#if title || titleAction}
+        <div
+            class="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white"
+        >
+            {#if title}
+                <h2 class="section-title">{title}</h2>
+            {/if}
+            {#if titleAction}
+                <div class="flex-shrink-0">
+                    {@render titleAction()}
+                </div>
+            {/if}
+        </div>
+    {/if}
+
     {#if data.length === 0}
         <div
             class="flex flex-col items-center justify-center p-8 sm:p-12 text-slate-500"
@@ -55,7 +72,7 @@
                     d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
                 />
             </svg>
-            <p class="text-sm font-medium">{emptyMessage}</p>
+            <p class="text-sm font-medium text-slate-500">{emptyMessage}</p>
             {@render emptyStateAction?.()}
         </div>
     {:else}
@@ -67,7 +84,7 @@
                         {#each columns as col}
                             <th
                                 scope="col"
-                                class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider text-{col.align ||
+                                class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-{col.align ||
                                     'left'}"
                             >
                                 {col.label}
@@ -75,10 +92,10 @@
                         {/each}
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-slate-200">
+                <tbody class="bg-white divide-y divide-slate-100">
                     {#each data as row, i}
                         <tr
-                            class="hover:bg-slate-50 focus-within:bg-slate-50 cursor-pointer transition-colors"
+                            class="hover:bg-slate-50 focus-within:bg-slate-50 cursor-pointer transition-colors group"
                             onclick={() => handleRowClick(row)}
                         >
                             {#if rowSnippet}
@@ -86,7 +103,7 @@
                             {:else}
                                 {#each columns as col}
                                     <td
-                                        class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-slate-600"
+                                        class="px-5 py-4 whitespace-nowrap text-sm text-slate-600"
                                     >
                                         {row[col.key]}
                                     </td>
@@ -113,10 +130,12 @@
                         <div class="space-y-3">
                             {#each visibleColumns as col}
                                 <div class="flex justify-between items-start">
-                                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    <span
+                                        class="text-xs font-semibold text-slate-500 uppercase tracking-wider"
                                         >{col.label}</span
                                     >
-                                    <span class="text-sm text-slate-900 font-medium text-right flex-1 ml-2"
+                                    <span
+                                        class="text-sm text-slate-900 font-medium text-right flex-1 ml-2"
                                         >{row[col.key]}</span
                                     >
                                 </div>
