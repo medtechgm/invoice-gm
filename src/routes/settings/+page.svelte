@@ -63,20 +63,20 @@
 </svelte:head>
 
 <div
-    class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4 sm:px-6 lg:px-8"
+    class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-6 sm:py-8 px-4 sm:px-6 lg:px-8"
 >
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div
-            class="flex items-center justify-between mb-8 flex-col sm:flex-row gap-4"
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8"
         >
             <div>
-                <h1 class="text-3xl font-bold text-slate-900">Settings</h1>
-                <p class="text-slate-500 text-sm mt-1">
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Settings</h1>
+                <p class="text-slate-500 text-xs sm:text-sm mt-1">
                     Manage your company profile and invoice defaults
                 </p>
             </div>
-            <AppButton variant="primary" onclick={handleSave}>
+            <AppButton variant="primary" onclick={handleSave} class="w-full sm:w-auto">
                 Save Changes
             </AppButton>
         </div>

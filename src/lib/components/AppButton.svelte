@@ -22,7 +22,7 @@
     }>();
 
     const baseStyle =
-        "inline-flex items-center justify-center font-medium transition-all duration-200 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2";
+        "inline-flex items-center justify-center font-medium transition-all duration-200 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 active:scale-95 min-h-[44px] sm:min-h-auto disabled:opacity-50 disabled:cursor-not-allowed";
 
     const variants = {
         primary:
@@ -36,9 +36,9 @@
     };
 
     const sizes = {
-        sm: "px-3 py-1.5 text-xs",
-        md: "px-4 py-2 text-sm",
-        lg: "px-5 py-2.5 text-base",
+        sm: "px-3 py-2 sm:py-1.5 text-xs sm:text-xs",
+        md: "px-4 py-3 sm:py-2 text-sm sm:text-sm",
+        lg: "px-5 py-4 sm:py-2.5 text-base sm:text-base",
     };
 
     let classes = $derived(

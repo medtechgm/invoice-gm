@@ -47,14 +47,14 @@
     <title>Clients - Invoicer App</title>
 </svelte:head>
 
-<div class="p-8 max-w-7xl mx-auto">
+<div class="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
     <div
-        class="flex items-center justify-between mb-8 flex-col sm:flex-row gap-4"
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8"
     >
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
             Clients
         </h1>
-        <AppButton href="/clients/new" variant="primary">
+        <AppButton href="/clients/new" variant="primary" class="w-full sm:w-auto">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

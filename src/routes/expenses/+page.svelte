@@ -50,20 +50,20 @@
 <div
     class="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100"
 >
-    <div class="p-8 max-w-7xl mx-auto">
+    <div class="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
         <!-- Header Section -->
         <div
-            class="flex items-center justify-between mb-8 flex-col sm:flex-row gap-4"
+            class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8"
         >
             <div>
-                <h1 class="text-4xl font-bold text-slate-900 tracking-tight">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
                     Expenses
                 </h1>
-                <p class="text-slate-500 text-sm mt-2">
+                <p class="text-slate-500 text-xs sm:text-sm mt-2">
                     Track your business spending
                 </p>
             </div>
-            <AppButton href="/expenses/new" variant="primary">
+            <AppButton href="/expenses/new" variant="primary" class="w-full sm:w-auto">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"

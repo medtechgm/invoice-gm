@@ -5,6 +5,7 @@
         key: string;
         label: string;
         align?: "left" | "center" | "right";
+        hideOnMobile?: boolean;
     };
 
     let {
@@ -28,14 +29,17 @@
             onRowClick(item);
         }
     }
+
+    // Get columns to show on mobile
+    const visibleColumns = columns.filter((col) => !col.hideOnMobile);
 </script>
 
 <div
-    class="w-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+    class="w-full bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200 overflow-hidden"
 >
     {#if data.length === 0}
         <div
-            class="flex flex-col items-center justify-center p-12 text-slate-500"
+            class="flex flex-col items-center justify-center p-8 sm:p-12 text-slate-500"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -55,14 +59,15 @@
             {@render emptyStateAction?.()}
         </div>
     {:else}
-        <div class="overflow-x-auto">
+        <!-- Desktop Table View -->
+        <div class="hidden sm:block overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-50">
                     <tr>
                         {#each columns as col}
                             <th
                                 scope="col"
-                                class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider text-{col.align ||
+                                class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider text-{col.align ||
                                     'left'}"
                             >
                                 {col.label}
@@ -81,7 +86,7 @@
                             {:else}
                                 {#each columns as col}
                                     <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-slate-600"
+                                        class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-slate-600"
                                     >
                                         {row[col.key]}
                                     </td>
@@ -91,6 +96,35 @@
                     {/each}
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="sm:hidden divide-y divide-slate-200">
+            {#each data as row, i}
+                <div
+                    class="p-4 hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer"
+                    onclick={() => handleRowClick(row)}
+                >
+                    {#if rowSnippet}
+                        <div class="space-y-2">
+                            {@render rowSnippet(row, i)}
+                        </div>
+                    {:else}
+                        <div class="space-y-3">
+                            {#each visibleColumns as col}
+                                <div class="flex justify-between items-start">
+                                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                        >{col.label}</span
+                                    >
+                                    <span class="text-sm text-slate-900 font-medium text-right flex-1 ml-2"
+                                        >{row[col.key]}</span
+                                    >
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            {/each}
         </div>
     {/if}
 </div>

@@ -31,36 +31,38 @@
 </script>
 
 <div
-    class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col items-center flex-1 min-w-[250px]"
+    class="card-responsive flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
 >
-    <div class="p-6 flex items-center justify-between w-full">
-        <div class="flex items-center gap-3">
-            <div class="text-slate-400">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="w-8 h-8"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d={icons[type]}
-                    />
-                </svg>
-            </div>
-            <h3 class="text-sm font-semibold text-slate-700">{title}</h3>
+    <div class="flex items-center gap-3 flex-1">
+        <div class="text-slate-400 flex-shrink-0">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6 sm:w-8 sm:h-8"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d={icons[type]}
+                />
+            </svg>
         </div>
-        <div class="text-2xl font-bold text-slate-800 tracking-tight">
-            {formattedAmount}
+        <div class="min-w-0">
+            <h3 class="text-xs sm:text-sm font-semibold text-slate-700 truncate">
+                {title}
+            </h3>
+            <div class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight mt-1">
+                {formattedAmount}
+            </div>
         </div>
     </div>
-    <div class="border-t border-slate-100 bg-slate-50/50 w-full px-6 py-3">
+    <div class="flex-shrink-0">
         <a
             href={linkHref}
-            class="text-sm text-blue-500 hover:text-blue-600 hover:underline"
+            class="inline-block text-xs sm:text-sm text-emerald-600 hover:text-emerald-700 hover:underline font-medium transition-colors"
         >
             {linkText}
         </a>

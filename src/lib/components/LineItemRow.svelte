@@ -60,12 +60,12 @@
 <div
     class="border-b border-slate-100 hover:bg-slate-50 transition-colors group"
 >
-    <!-- Main row: Name, Rate, Qty, Line Total -->
-    <div class="py-4 px-4 grid grid-cols-12 gap-4 items-start">
+    <!-- Main row responsive grid -->
+    <div class="py-3 sm:py-4 px-3 sm:px-4 grid grid-cols-12 gap-2 sm:gap-4 items-start">
         <!-- Drag Handle -->
-        <div class="col-span-1 flex items-center justify-center pt-1">
+        <div class="col-span-1 flex items-center justify-center pt-0.5 sm:pt-1">
             <div
-                class="flex-shrink-0 flex items-center justify-center text-slate-300 group-hover:text-slate-400 cursor-move"
+                class="flex-shrink-0 flex items-center justify-center text-slate-300 group-hover:text-slate-400 cursor-move hidden sm:flex"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -80,8 +80,8 @@
             </div>
         </div>
 
-        <!-- Item Name Input with Autocomplete -->
-        <div class="col-span-6 relative">
+        <!-- Item Name Input with Autocomplete - responsive width -->
+        <div class="col-span-4 sm:col-span-4 relative">
             <input
                 id="item-name-{item.id}"
                 type="text"

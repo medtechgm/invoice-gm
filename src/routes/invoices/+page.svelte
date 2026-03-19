@@ -62,14 +62,14 @@
     <title>Invoices - Invoicer App</title>
 </svelte:head>
 
-<div class="p-4 sm:p-8 max-w-7xl mx-auto">
+<div class="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
     <div
-        class="flex items-center justify-between mb-8 flex-col sm:flex-row gap-4"
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8"
     >
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
             Invoices
         </h1>
-        <AppButton href="/invoices/new" variant="primary">
+        <AppButton href="/invoices/new" variant="primary" class="w-full sm:w-auto">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -88,9 +88,9 @@
         </AppButton>
     </div>
 
-    <div class="mb-6 overflow-x-auto">
+    <div class="mb-4 sm:mb-6 overflow-x-auto">
         <div class="border-b border-slate-200">
-            <nav class="-mb-px flex space-x-8 min-w-max" aria-label="Tabs">
+            <nav class="-mb-px flex space-x-4 sm:space-x-8 min-w-max" aria-label="Tabs">
                 {#each filterTabs as tab}
                     <button
                         onclick={() =>

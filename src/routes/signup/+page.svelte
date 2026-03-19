@@ -14,19 +14,19 @@
 >
     <!-- Background Decorators -->
     <div
-        class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40"
+        class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 sm:w-96 sm:h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40"
     ></div>
     <div
-        class="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40"
+        class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 sm:w-96 sm:h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40"
     ></div>
 
-    <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4 sm:px-0">
+    <div class="mx-auto w-full px-4 sm:max-w-md relative z-10 sm:px-0">
         <div
-            class="bg-white/80 backdrop-blur-xl py-10 px-6 sm:px-12 shadow-2xl rounded-3xl border border-white"
+            class="bg-white/80 backdrop-blur-xl py-8 sm:py-10 px-4 sm:px-12 shadow-2xl rounded-2xl sm:rounded-3xl border border-white"
         >
-            <div class="mb-10 text-center">
+            <div class="mb-8 sm:mb-10 text-center">
                 <div
-                    class="mx-auto w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-500/30"
+                    class="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white mb-4 sm:mb-6 shadow-lg shadow-emerald-500/30"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -34,7 +34,7 @@
                         viewBox="0 0 24 24"
                         stroke-width="2"
                         stroke="currentColor"
-                        class="w-7 h-7"
+                        class="w-5 h-5 sm:w-7 sm:h-7"
                     >
                         <path
                             stroke-linecap="round"
@@ -44,17 +44,17 @@
                     </svg>
                 </div>
                 <h2
-                    class="text-3xl font-extrabold text-slate-900 tracking-tight"
+                    class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight"
                 >
                     Create your account
                 </h2>
-                <p class="mt-2 text-sm text-slate-600">
+                <p class="mt-2 text-xs sm:text-sm text-slate-600">
                     Join thousands of modern businesses
                 </p>
             </div>
 
             <form
-                class="space-y-5"
+                class="space-y-4 sm:space-y-5"
                 method="POST"
                 use:enhance={() => {
                     loading = true;
